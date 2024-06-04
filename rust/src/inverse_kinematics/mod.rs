@@ -1,4 +1,4 @@
-pub(crate) mod auxiliary;
+pub mod auxiliary;
 pub(crate) mod setups;
 pub mod hardcoded;
 
