@@ -15,9 +15,13 @@ on:
       - 'ik_python/**'
       - 'rust/**'
   workflow_dispatch:
+defaults:
+    run:
+        working-directory: ik_python
 jobs:
     # Run the CI workflow in the ik_python folder
     linux:
+        
         runs-on: ${{ matrix.platform.runner }}
         strategy:
           matrix:
@@ -35,7 +39,6 @@ jobs:
               - runner: ubuntu-latest
                 target: ppc64le
         steps:
-          - run : cd ik_python
           - uses: actions/checkout@v4
           - uses: actions/setup-python@v5
             with:
@@ -62,7 +65,6 @@ jobs:
               - runner: windows-latest
                 target: x86
         steps:
-          - run : cd ik_python
           - uses: actions/checkout@v4
           - uses: actions/setup-python@v5
             with:
@@ -90,7 +92,6 @@ jobs:
               - runner: macos-14
                 target: aarch64
         steps:
-          - run : cd ik_python
           - uses: actions/checkout@v4
           - uses: actions/setup-python@v5
             with:
@@ -110,7 +111,6 @@ jobs:
     sdist:
         runs-on: ubuntu-latest
         steps:
-          - run : cd ik_python
           - uses: actions/checkout@v4
           - name: Build sdist
             uses: PyO3/maturin-action@v1
@@ -128,7 +128,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         needs: [linux, windows, macos, sdist]
         steps:
-          - run : cd ik_python
           - uses: actions/download-artifact@v4
           - name: Publish to PyPI
             uses: PyO3/maturin-action@v1
