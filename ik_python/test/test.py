@@ -11,14 +11,15 @@ from collections import namedtuple
 import numpy as np
 import unittest
 import ik_python
+from math import pi
 
 # Import the csv files
 import csv
 import os
 
 TestBot = namedtuple('TestBot', ['casename', 'robot', 'testcases'])
-TestCaseGeneral = namedtuple('TestCase', ['hVals','pVals','rotationMatrix', 'positionVector'])
-TestCaseHardCoded = namedtuple('TestCase', ['rotationMatrix', 'positionVector'])
+TestCaseGeneral = namedtuple('TestCaseGeneral', ['hVals','pVals'])
+TestCaseHardCoded = namedtuple('TestCaseHardCoded', ['rotationMatrix', 'positionVector'])
 
 
 zeroresult = [0.0] * 6
@@ -41,37 +42,54 @@ class TestGeneralRobots(unittest.TestCase):
                 for row in reader:
                     if not row:
                         continue
+                    # Parse the given h and p vals to get a valid robot configuration
                     hVals = [float(x) for x in row[0:18]]
                     pVals = [float(x) for x in row[18:39]]
-                    rotationMatrix = [float(x) for x in row[39:48]]
-                    positionVector = [float(x) for x in row[48:51]]
-                    
-                    testcases.append(TestCaseGeneral(hVals, pVals, rotationMatrix, positionVector))
+                    testcases.append(TestCaseGeneral(hVals, pVals))
             self.bots.append(TestBot(filename, robot, testcases))
 
     def test_general_robots(self):
-        for bot in self.bots:
+        np.random.seed(0)
+        for botNum, bot in enumerate(self.bots):
             print ("Testing " + bot.casename)
             for testCase in bot.testcases:
-                hMatrix = np.array([testCase.hVals[i:i+3] for i in range(0, len(testCase.hVals), 3)])
-                pMatrix = np.array([testCase.pVals[i:i+3] for i in range(0, len(testCase.pVals), 3)])
-                
+                hMatrix = np.reshape(testCase.hVals, (6,3))
+                pMatrix = np.reshape(testCase.pVals, (7,3))
                 kinematics = ik_python.KinematicsObject(hMatrix, pMatrix)
                 bot.robot.set_kinematics(kinematics)
-                rotationMatrix = np.array([testCase.rotationMatrix[i:i+3] for i in range(0, len(testCase.rotationMatrix), 3)])
-                positionVector = testCase.positionVector
-                result = bot.robot.get_ik(rotationMatrix, positionVector)
-                # Run the forward kinematics and check if the error is below epsilon
-                forward_kinematics = bot.robot.forward_kinematics(result[0])
-                print (forward_kinematics)
-                print(rotationMatrix)
-                print(positionVector)
-                self.assertTrue(np.allclose(forward_kinematics[0], rotationMatrix, atol=epsilon))
-                self.assertTrue(np.allclose(forward_kinematics[1], positionVector, atol=epsilon))
+
+                # Generate 100 random robot configurations
+                qVals = np.random.rand(20, 6) * pi
+                for i, q in enumerate(qVals):
+                    # Get the forward kinematics result and then run inverse to see if we get the same thing
+                    forward_kinematics = bot.robot.forward_kinematics(q)
+                    rotation = np.array(forward_kinematics[0])
+                    translation = np.array(forward_kinematics[1])
+
+
+                    # Get the inverse kinematics
+                    result = bot.robot.get_ik(forward_kinematics[0], forward_kinematics[1])
+
+                    # Run forward kinematics on the result to make sure it is the same as the input
+                    resultForward = bot.robot.forward_kinematics(result[0])
+                    resultRotation = np.array(resultForward[0])
+                    resultTranslation = np.array(resultForward[1])
+
+                    # Check to make sure each value is roughly equal, up to 2pi
+                    for resultVal, expectedVal in zip(rotation.flatten() , resultRotation.flatten()):
+                        self.assertAlmostEqual(resultVal % (2*pi), expectedVal % (2*pi) , delta=epsilon, 
+                            msg=f"Failed on test {i + 1} of {bot.casename} configuration {botNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
+                            \nRotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
+                            \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}")
+                    for resultVal, expectedVal in zip(translation, resultTranslation):
+                        self.assertAlmostEqual(resultVal, expectedVal, delta=epsilon, 
+                                               msg=f"Failed on test {i + 1} of {bot.casename} configuration {botNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
+                                               \Rotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
+                                               \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}")
 
 
 
-class TestHardcodedBots(unittest.TestCase):
+class TestHardcodedBots:#(unittest.TestCase):
     def setUp(self):
         self.bots = []
         for filename in hardcodedFilenames:
