@@ -13,7 +13,7 @@ def run_ik_hardcoded():
     print("qVals: ", qVals)
     print("ils: ", isLs)
     print("-----------------------------")
-
+ 
 def run_ik_general():
     print("\nRunning general inverse kinematics:\n-----------------------------")
     # Create the robot, type sphericalTwoParallel
