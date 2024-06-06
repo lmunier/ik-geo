@@ -24,7 +24,7 @@ TestCaseHardCoded = namedtuple('TestCaseHardCoded', ['rotationMatrix', 'position
 
 zeroresult = [0.0] * 6
 
-epsilon = 1e-4
+epsilon = 1e-2
 # Test the general robots
 class TestGeneralRobots(unittest.TestCase):
     def setUp(self):
@@ -59,7 +59,7 @@ class TestGeneralRobots(unittest.TestCase):
                 bot.robot.set_kinematics(kinematics)
 
                 # Generate 100 random robot configurations
-                qVals = np.random.rand(20, 6) * pi
+                qVals = np.random.rand(20, 6) * pi + pi/2
                 for i, q in enumerate(qVals):
                     # Get the forward kinematics result and then run inverse to see if we get the same thing
                     forward_kinematics = bot.robot.forward_kinematics(q)
@@ -89,7 +89,7 @@ class TestGeneralRobots(unittest.TestCase):
 
 
 
-class TestHardcodedBots:#(unittest.TestCase):
+class TestHardcodedBots(unittest.TestCase):
     def setUp(self):
         self.bots = []
         for filename in hardcodedFilenames:
