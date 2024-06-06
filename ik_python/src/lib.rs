@@ -32,6 +32,7 @@ impl Robot {
             "irb6640" => {
                 hardcoded_solver = irb6640;
                 general_solver = dummy_solver_general;
+
                 is_hardcoded = true;
             },
             "kukar800fixedq3" => {
@@ -110,7 +111,7 @@ impl Robot {
                 is_hardcoded = false;
             },
             _ => {
-                return Err(PyErr::new::<PyValueError, _>("Invalid robot type, must be one of: \n
+                return Err(PyErr::new::<PyValueError, _>("Invalid robot type, must be one of:\n
                        Irb6640, KukaR800FixedQ3, Ur5, ThreeParallelBot, TwoParallelBot, RrcFixedQ6, SphericalBot, YumiFixedQ3, \n
                        SphericalTwoParallel, SphericalTwoIntersecting, Spherical, ThreeParallelTwoIntersecting, ThreeParallel, TwoParallel, TwoIntersecting, GenSixDof"));
             }
@@ -121,7 +122,7 @@ impl Robot {
             general_solver,
             is_hardcoded,
             kin_set: false,
-            kin: Kinematics::new(),
+            kin: Kinematics::<6,7>::new()
         })
     }
 
@@ -157,10 +158,37 @@ impl Robot {
             (q, is_ls) = (self.general_solver)(&rotation, &translation, &self.kin)
         }
         let mut ret_vals = [0.0; 6];
-        for i in 0..6 {
-            ret_vals[i] = q[0][i];
+        let mut is_least_squares = true;
+        if q.len() > 0 {
+            for i in 0..6 {
+                ret_vals[i] = q[0][i];
+            }
+            is_least_squares = is_ls[0];
         }
-        Ok((ret_vals, is_ls[0]))
+        Ok((ret_vals, is_least_squares))
+    }
+
+    pub fn forward_kinematics(&self, q: [f64; 6]) -> PyResult<([[f64; 3];3], [f64; 3])> {
+        if !self.kin_set && !self.is_hardcoded {
+            return Err(PyValueError::new_err("Kinematics must be set before calling forward kinematics"));
+        } else if self.is_hardcoded {
+            return Err(PyValueError::new_err("Forward kinematics not implemented for hardcoded solvers"));
+        }
+        let mut q_vec = Vector6::zeros();
+        for i in 0..6 {
+            q_vec[i] = q[i];
+        }
+        let (r, p) = self.kin.forward_kinematics(&q_vec);
+        let mut r_vals = [[0.0; 3]; 3];
+        let mut p_vals = [0.0; 3];
+        for i in 0..3 {
+            for j in 0..3 {
+                r_vals[j][i] = r[(i,j)];
+            }
+            p_vals[i] = p[i];
+        }
+        Ok((r_vals, p_vals))
+        
     }
 }
 
@@ -192,16 +220,16 @@ impl KinematicsObject {
     // p_vals: array of vals in the p matrix, column major
     // Basically, both are of format [[1,0,0], [0,1,0]...] where these are the vectors
     #[new]
-    fn new (h_vals : [[f64; Self::H_COLS]; Self::H_ROWS], p_vals : [[f64; Self::P_COLS]; Self::P_ROWS]) -> Self {
+    fn new (h_vals : [[f64; Self::H_ROWS]; Self::H_COLS], p_vals : [[f64; Self::P_ROWS]; Self::P_COLS]) -> Self {
         let mut kin = Kinematics::<6,7>::new();
         for i in 0..Self::H_ROWS {
             for j in 0..Self::H_COLS {
-                kin.h[(i,j)] = h_vals[i][j];
+                kin.h[(i,j)] = h_vals[j][i];
             }
         }
         for i in 0..Self::P_ROWS {
             for j in 0..Self::P_COLS {
-                kin.p[(i,j)] = p_vals[i][j];
+                kin.p[(i,j)] = p_vals[j][i];
             }
         }
         KinematicsObject {
