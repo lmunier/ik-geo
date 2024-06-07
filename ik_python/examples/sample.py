@@ -2,14 +2,16 @@ import ik_python
 # Sample assumes you have numpy installed globally
 import numpy as np
 
+
 def run_ik_hardcoded():
     print("\nRunning hardcoded inverse kinematics:\n-----------------------------")
     # Create the robot, type ur5
-    robot = ik_python.Robot("ur5")
+    # This can be done with string literals as well as factory methods (shown below)
+    robot = ik_python.Robot("Ur5")
     # Get the inverse kinematics
     # The first argument is the rotation matrix (3x3, row major)
     # The second argument is the position vector (3x1)
-    (qVals, isLs) = robot.get_ik([[1,0,0],[0,1,0],[0,0,1]], [0, 0, 0]);
+    (qVals, isLs) = robot.get_ik([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]], [0., 0., 0.]);
     print("qVals: ", qVals)
     print("ils: ", isLs)
     print("-----------------------------")
@@ -43,6 +45,22 @@ def run_ik_general():
     print("qVals: ", qVals)
     print("ils: ", isLs)
 
+# Running with factory methods
+def run_ik_with_factory():
+    print("\nRunning inverse kinematics with factory methods:\n-----------------------------")
+    # You can also use the factory methods to create the robot
+    robot = ik_python.Robot.irb6640()
+    # Get the inverse kinematics
+    # The first argument is the rotation matrix (3x3, row major)
+    # The second argument is the position vector (3x1)
+    rotMatrix = np.array([[1,0,0],[0,1,0],[0,0,1]])
+    posVector = np.array([0, 0, 0])
+
+    (qVals, isLs) = robot.get_ik(rotMatrix, posVector);
+    print("qVals: ", qVals)
+    print("ils: ", isLs)
+    print("-----------------------------")
     
 run_ik_hardcoded()
 run_ik_general()
+run_ik_with_factory()

@@ -190,6 +190,87 @@ impl Robot {
         Ok((r_vals, p_vals))
         
     }
+
+    // Factory methods for each robot type
+    #[staticmethod]
+    fn irb6640() -> PyResult<Self> {
+        Self::new("irb6640")
+    }
+
+    #[staticmethod]
+    fn kuka_r800_fixed_q3() -> PyResult<Self> {
+        Self::new("kukar800fixedq3")
+    }
+
+    #[staticmethod]
+    fn ur5() -> PyResult<Self> {
+        Self::new("ur5")
+    }
+
+    #[staticmethod]
+    fn three_parallel_bot() -> PyResult<Self> {
+        Self::new("threeparallelbot")
+    }
+
+    #[staticmethod]
+    fn two_parallel_bot() -> PyResult<Self> {
+        Self::new("twoparallelbot")
+    }
+
+    #[staticmethod]
+    fn rrc_fixed_q6() -> PyResult<Self> {
+        Self::new("rrcfixedq6")
+    }
+
+    #[staticmethod]
+    fn spherical_bot() -> PyResult<Self> {
+        Self::new("sphericalbot")
+    }
+
+    #[staticmethod]
+    fn yumi_fixed_q3() -> PyResult<Self> {
+        Self::new("yumifixedq3")
+    }
+
+    #[staticmethod]
+    fn spherical_two_parallel() -> PyResult<Self> {
+        Self::new("sphericaltwoparallel")
+    }
+
+    #[staticmethod]
+    fn spherical_two_intersecting() -> PyResult<Self> {
+        Self::new("sphericaltwointersecting")
+    }
+
+    #[staticmethod]
+    fn spherical() -> PyResult<Self> {
+        Self::new("spherical")
+    }
+
+    #[staticmethod]
+    fn three_parallel_two_intersecting() -> PyResult<Self> {
+        Self::new("threeparalleltwointersecting")
+    }
+
+    #[staticmethod]
+    fn three_parallel() -> PyResult<Self> {
+        Self::new("threeparallel")
+    }
+
+    #[staticmethod]
+    fn two_parallel() -> PyResult<Self> {
+        Self::new("twoparallel")
+    }
+
+    #[staticmethod]
+    fn two_intersecting() -> PyResult<Self> {
+        Self::new("twointersecting")
+    }
+
+    #[staticmethod]
+    fn gen_six_dof() -> PyResult<Self> {
+        Self::new("gensixdof")
+    }
 }
 
 fn dummy_solver_hardcoded(_ :  &Matrix3<f64>, _ : &Vector3<f64>) -> (Vec<Vector6<f64>>, Vec<bool>) {
