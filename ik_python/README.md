@@ -6,7 +6,7 @@ This is a python api for the rust implementation of inverse kinematics using PyO
 
 This requires [PyO3 maturin](https://pyo3.rs/v0.21.2/) to be installed.
 
-In the ik_python directory, you can run this to install it:
+In the `ik_python` directory, you can run this to install it:
 ```bash
 python -m venv .env
 source .env/bin/activate
@@ -21,8 +21,8 @@ Outisde of the virtual environment, you can use the following command to build a
 
 ## To use
 
-Import the ik_python package into your code
+Import the `ik_python` package in your code
 
-The API documentation is at ik_python.pyi, and there will be typechecking with mypy installed.
+The API documentation is at `ik_python.pyi`, and there will be typechecking with mypy installed.
 
-Look at examples/sample.py for sample usage
+Look at `examples/sample.py` for sample usage
