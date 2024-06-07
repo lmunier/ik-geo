@@ -33,12 +33,13 @@ jobs:
               pip install numpy
           - name: Run tests
             run: |
-              python inverse_kinematics/test/test.py
+              python test/test.py
             # If it fails, the workflow will fail
             continue-on-error: false
     linux:
         
         runs-on: ${{ matrix.platform.runner }}
+        needs: [test]
         strategy:
           matrix:
             platform:
@@ -73,6 +74,7 @@ jobs:
               name: wheels-linux-${{ matrix.platform.target }}
               path: ik_python/dist
     windows:
+        needs: [test]
         runs-on: ${{ matrix.platform.runner }}
         strategy:
           matrix:
@@ -101,6 +103,7 @@ jobs:
               path: ik_python/dist
     
     macos:
+        needs: [test]
         runs-on: ${{ matrix.platform.runner }}
         strategy:
           matrix:
@@ -128,6 +131,7 @@ jobs:
               path: ik_python/dist
     
     sdist:
+        needs: [test]
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v4
