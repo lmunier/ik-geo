@@ -44,7 +44,7 @@ class Robot:
         """
         Get the forward kinematics for the robot, not implemented for hardcoded bots
 
-        :param qVals: The rotation values of each joint
+        :param qVals: The rotation values of each joint 
         :return: A tuple containing the rotation matrix and position vector
         """
         ...
