@@ -43,7 +43,7 @@ class TestGeneralRobots(unittest.TestCase):
             bot.robot.set_kinematics(kinematics)
 
             # Generate 100 random robot configurations
-            qVals = np.random.rand(20, 6) * pi + pi/2
+            qVals = np.random.rand(20, 6) * 2 * pi
             for i, q in enumerate(qVals):
                 # Get the forward kinematics result and then run inverse to see if we get the same thing
                 forward_kinematics = bot.robot.forward_kinematics(q)
