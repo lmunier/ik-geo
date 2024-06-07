@@ -12,7 +12,7 @@ class KinematicsObject:
         ...
 
 class Robot:
-    """ 
+    """  
     Representation of the robot for inverse kinematics
 
     :param robotType: The type of robot to create, either a specific hardcoded bot or a general type of bot
