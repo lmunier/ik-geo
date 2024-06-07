@@ -129,12 +129,4 @@ if __name__ == '__main__':
         add_general_test(filename)
     for filename in hardcodedFilenames:
         add_hardcoded_test(filename)
-    # Generate classes for each hardcoded test case
-    # for filename in hardcodedFilenames:
-    #     test_case = type('Test' + filename, (unittest.TestCase, object, ), {
-    #         'filename': filename,
-    #         'setUp': hardcoded_test_case_setup,
-    #         'run_test': hardcoded_test_case
-    #         })
-    #     globals()[test_case.__name__] = test_case
     unittest.main()
