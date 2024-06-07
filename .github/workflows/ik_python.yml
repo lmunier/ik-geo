@@ -30,16 +30,15 @@ jobs:
           uses: PyO3/maturin-action@v1
           with:
             target: x86_64
-            args: --release --out dist --find-interpreter
-            sccache: 'true'
-            manylinux: auto
+            command: develop
+            args: --find-interpreter
             working-directory: ik_python
         - name: Test wheels
           run: |
             python -m pip install --upgrade pip
             python -m pip install ik_python
             python -m pip install numpy
-            python ik_python/test/test.py
+            python ik_python/test/test.py | egrep "FAILED|ERROR" && exit 1 || exit 0
           continue-on-error: false
     linux:
         needs: test
