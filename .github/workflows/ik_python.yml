@@ -31,7 +31,6 @@ jobs:
           with:
             target: x86_64
             command: develop
-            args: --find-interpreter
             working-directory: ik_python
         - name: Test wheels
           run: |

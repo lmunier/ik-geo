@@ -11,7 +11,7 @@ class KinematicsObject:
     def __init__(self, hMatrix: List[List[float]], pMatrix: List[List[float]]) -> None:
         ...
 
-class Robot:
+class Robot: 
     """
     Representation of the robot for inverse kinematics
 
