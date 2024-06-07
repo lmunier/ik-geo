@@ -34,6 +34,9 @@ jobs:
             working-directory: ik_python
         - name: Test wheels
           run: |
+            ls -l
+            ls -l ik_python
+            ls -l ik_python/dist
             python -m pip install --upgrade pip
             python -m pip install ik_python
             python -m pip install numpy
