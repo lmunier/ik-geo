@@ -17,7 +17,7 @@ def run_ik_hardcoded():
 def run_ik_general():
     print("\nRunning general inverse kinematics:\n-----------------------------")
     # Create the robot, type sphericalTwoParallel
-    robot = ik_python.Robot("genSixDof")
+    robot = ik_python.Robot("SphericalTwoIntersecting")
 
     # Create the kinematics
     # Paremeters are deconstructed h matrix and p matrix
