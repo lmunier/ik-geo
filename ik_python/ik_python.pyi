@@ -33,7 +33,7 @@ class Robot:
 
     def get_ik(self, rotationMatrix: List[List[float]], positionVector: List[float]) -> Tuple[List[float], bool]:
         """
-        Get the inverse kinematics for the robot
+        Get the inverse kinematics for the robot 
 
         :param rotationMatrix: The rotation matrix to use for the inverse kinematics
         :param positionVector: The position vector to use for the inverse kinematics

@@ -39,7 +39,7 @@ jobs:
             ls -l
             ls -l dist
             python -m pip install --upgrade pip
-            python -m pip install -e dist/ik_python
+            python -m pip install dist/ik_python*.whl
             python -m pip install numpy
             python ik_python/test/test.py | egrep "FAILED|ERROR" && exit 1 || exit 0
           continue-on-error: false
