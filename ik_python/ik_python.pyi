@@ -38,7 +38,7 @@ class Robot:
         :param rotationMatrix: The rotation matrix to use for the inverse kinematics
         :param positionVector: The position vector to use for the inverse kinematics
         :return: A tuple containing the rotation values of each joint and whether the solution is least squares
-        """
+        """ 
         ...
     def forward_kinematics(self, qVals) -> Tuple[List[List[float]], List[float]]:
         """
