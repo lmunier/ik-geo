@@ -30,7 +30,7 @@ jobs:
           uses: PyO3/maturin-action@v1
           with:
             target: x86_64
-            command: develop
+            command: build
             working-directory: ik_python
         - name: Test wheels
           run: |
