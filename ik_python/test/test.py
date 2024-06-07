@@ -8,6 +8,7 @@
 # Instead, we will just run inverse kinematics on all of the given test cases in the test_cases folder and make sure that we actually return a nonzero result
 # THIS IS NOT A TEST FOR CORRECTNESS ON HARD-CODED BOTS, ONLY ON GENERAL BOTS
 
+# Requires numpy to be installed
 
 # Import the test case csv files
 generalFilenames = ['IK_2_intersecting', 'IK_2_parallel', 'IK_3_parallel_2_intersecting', 'IK_3_parallel', 'IK_gen_6_dof', 'IK_spherical', 'IK_spherical_2_parallel', 'IK_spherical_2_intersecting']
