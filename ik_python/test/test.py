@@ -60,7 +60,7 @@ class TestGeneralRobots(unittest.TestCase):
 
                 # Check to make sure each value is roughly equal, up to 2pi
                 for resultVal, expectedVal in zip(rotation.flatten() , resultRotation.flatten()):
-                    self.assertAlmostEqual(resultVal % (2*pi), expectedVal % (2*pi) , delta=epsilon, 
+                    self.assertAlmostEqual(resultVal, expectedVal, delta=epsilon, 
                         msg=f"Failed on test {i + 1} of {bot.casename} configuration {configNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
                         \nRotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
                         \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}")
