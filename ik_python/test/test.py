@@ -11,7 +11,7 @@
 # Requires numpy to be installed
 
 # Import the test case csv files
-generalFilenames = ['IK_2_intersecting', 'IK_2_parallel', 'IK_3_parallel_2_intersecting', 'IK_3_parallel', 'IK_gen_6_dof', 'IK_spherical', 'IK_spherical_2_parallel', 'IK_spherical_2_intersecting']
+generalFilenames = ['IK_2_intersecting', 'IK_2_parallel', 'IK_3_parallel_2_intersecting', 'IK_3_parallel', 'IK_spherical', 'IK_spherical_2_parallel', 'IK_spherical_2_intersecting', 'IK_gen_6_dof']
 hardcodedFilenames = ['IRB_6640', 'KUKA_R800_fixed_q3', "RRC_fixed_q6", "spherical_bot", "three_parallel_bot", "two_parallel_bot", "ur5", "yumi_fixed_q3"]
 
 from collections import namedtuple
@@ -42,8 +42,11 @@ class TestGeneralRobots(unittest.TestCase):
             kinematics = ik_python.KinematicsObject(hMatrix, pMatrix)
             bot.robot.set_kinematics(kinematics)
 
-            # Generate 100 random robot configurations
+            # Generate 20 random robot configurations
             qVals = np.random.rand(20, 6) * 2 * pi
+            # Generate fewer for the 6 dof bot because it is slower
+            if bot.casename == "IK_gen_6_dof":
+                qVals = np.random.rand(5, 6) * 2 * pi
             for i, q in enumerate(qVals):
                 # Get the forward kinematics result and then run inverse to see if we get the same thing
                 forward_kinematics = bot.robot.forward_kinematics(q)

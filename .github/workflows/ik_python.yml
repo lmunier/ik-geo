@@ -41,7 +41,7 @@ jobs:
             python -m pip install --upgrade pip
             python -m pip install dist/ik_python*.whl
             python -m pip install numpy
-            python test/test.py | egrep "FAILED|ERROR" && exit 1 || exit 0
+            python test/test.py 2>&1 | egrep "FAILED|ERROR" && exit 1 || exit 0
           continue-on-error: false
     linux:
         needs: test
