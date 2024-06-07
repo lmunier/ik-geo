@@ -11,8 +11,26 @@
 # Requires numpy to be installed
 
 # Import the test case csv files
-generalFilenames = ['IK_2_intersecting', 'IK_2_parallel', 'IK_3_parallel_2_intersecting', 'IK_3_parallel', 'IK_spherical', 'IK_spherical_2_parallel', 'IK_spherical_2_intersecting', 'IK_gen_6_dof']
-hardcodedFilenames = ['IRB_6640', 'KUKA_R800_fixed_q3', "RRC_fixed_q6", "spherical_bot", "three_parallel_bot", "two_parallel_bot", "ur5", "yumi_fixed_q3"]
+generalFilenames = [
+    "IK_2_intersecting",
+    "IK_2_parallel",
+    "IK_3_parallel_2_intersecting",
+    "IK_3_parallel",
+    "IK_spherical",
+    "IK_spherical_2_parallel",
+    "IK_spherical_2_intersecting",
+    "IK_gen_6_dof",
+]
+hardcodedFilenames = [
+    "IRB_6640",
+    "KUKA_R800_fixed_q3",
+    "RRC_fixed_q6",
+    "spherical_bot",
+    "three_parallel_bot",
+    "two_parallel_bot",
+    "ur5",
+    "yumi_fixed_q3",
+]
 
 from collections import namedtuple
 import numpy as np
@@ -24,21 +42,25 @@ from math import pi
 import csv
 import os
 
-TestBot = namedtuple('TestBot', ['casename', 'robot', 'testcases'])
-TestCaseGeneral = namedtuple('TestCaseGeneral', ['hVals','pVals'])
-TestCaseHardCoded = namedtuple('TestCaseHardCoded', ['rotationMatrix', 'positionVector'])
+TestBot = namedtuple("TestBot", ["casename", "robot", "testcases"])
+TestCaseGeneral = namedtuple("TestCaseGeneral", ["hVals", "pVals"])
+TestCaseHardCoded = namedtuple(
+    "TestCaseHardCoded", ["rotationMatrix", "positionVector"]
+)
 
 
 zeroresult = [0.0] * 6
 
 epsilon = 1e-2
+
+
 # Test the general robots
 class TestGeneralRobots(unittest.TestCase):
     def check_general_robot(self, bot):
-        print ("Testing " + bot.casename)
+        print("Testing " + bot.casename)
         for configNum, testCase in enumerate(bot.testcases):
-            hMatrix = np.reshape(testCase.hVals, (6,3))
-            pMatrix = np.reshape(testCase.pVals, (7,3))
+            hMatrix = np.reshape(testCase.hVals, (6, 3))
+            pMatrix = np.reshape(testCase.pVals, (7, 3))
             kinematics = ik_python.KinematicsObject(hMatrix, pMatrix)
             bot.robot.set_kinematics(kinematics)
 
@@ -53,7 +75,6 @@ class TestGeneralRobots(unittest.TestCase):
                 rotation = np.array(forward_kinematics[0])
                 translation = np.array(forward_kinematics[1])
 
-
                 # Get the inverse kinematics
                 result = bot.robot.get_ik(forward_kinematics[0], forward_kinematics[1])
 
@@ -63,27 +84,45 @@ class TestGeneralRobots(unittest.TestCase):
                 resultTranslation = np.array(resultForward[1])
 
                 # Check to make sure each value is roughly equal, up to 2pi
-                for resultVal, expectedVal in zip(rotation.flatten() , resultRotation.flatten()):
-                    self.assertAlmostEqual(resultVal, expectedVal, delta=epsilon, 
+                for resultVal, expectedVal in zip(
+                    rotation.flatten(), resultRotation.flatten()
+                ):
+                    self.assertAlmostEqual(
+                        resultVal,
+                        expectedVal,
+                        delta=epsilon,
                         msg=f"Failed on test {i + 1} of {bot.casename} configuration {configNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
                         \nRotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
-                        \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}")
+                        \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}",
+                    )
                 for resultVal, expectedVal in zip(translation, resultTranslation):
-                    self.assertAlmostEqual(resultVal, expectedVal, delta=epsilon, 
-                                            msg=f"Failed on test {i + 1} of {bot.casename} configuration {configNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
+                    self.assertAlmostEqual(
+                        resultVal,
+                        expectedVal,
+                        delta=epsilon,
+                        msg=f"Failed on test {i + 1} of {bot.casename} configuration {configNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
                                             \Rotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
-                                            \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}")
-            
-
+                                            \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}",
+                    )
 
 
 def add_general_test(filename):
     # Setup the robot from the filename
-    robot = ik_python.Robot(filename.replace('IK_', '').replace('_', '').replace("2","two").replace("3","three").replace("6","six"))
+    robot = ik_python.Robot(
+        filename.replace("IK_", "")
+        .replace("_", "")
+        .replace("2", "two")
+        .replace("3", "three")
+        .replace("6", "six")
+    )
 
     testcases = []
     # Open ../../test_cases/FILENAME.csv
-    with open(os.path.join(os.path.dirname(__file__), '..', '..', 'test_cases', filename + '.csv')) as f:
+    with open(
+        os.path.join(
+            os.path.dirname(__file__), "..", "..", "test_cases", filename + ".csv"
+        )
+    ) as f:
         reader = csv.reader(f)
         # Skip the header
         next(reader)
@@ -95,17 +134,31 @@ def add_general_test(filename):
             pVals = [float(x) for x in row[18:39]]
             testcases.append(TestCaseGeneral(hVals, pVals))
     bot = TestBot(filename, robot, testcases)
-    setattr(TestGeneralRobots, 'test_' + filename, lambda self: self.check_general_robot(bot))
+    setattr(
+        TestGeneralRobots,
+        "test_" + filename,
+        lambda self: self.check_general_robot(bot),
+    )
 
 
 class TestHardcodedBots(unittest.TestCase):
     def check_hardcoded_robot(self, bot):
-        print ("Testing " + bot.casename)
+        print("Testing " + bot.casename)
         for testCase in bot.testcases:
-            rotationMatrix = np.array([testCase.rotationMatrix[i:i+3] for i in range(0, len(testCase.rotationMatrix), 3)])
+            rotationMatrix = np.array(
+                [
+                    testCase.rotationMatrix[i : i + 3]
+                    for i in range(0, len(testCase.rotationMatrix), 3)
+                ]
+            )
             positionVector = testCase.positionVector
             result = bot.robot.get_ik(rotationMatrix, positionVector)
-            self.assertNotEqual(result[0], zeroresult, msg=f"Failed on {bot.casename} with rotation matrix: \n{rotationMatrix} and position vector: \n{positionVector}. \nNo result was returned.")
+            self.assertNotEqual(
+                result[0],
+                zeroresult,
+                msg=f"Failed on {bot.casename} with rotation matrix: \n{rotationMatrix} and position vector: \n{positionVector}. \nNo result was returned.",
+            )
+
 
 def add_hardcoded_test(filename):
     # Setup the robot from the filename
@@ -113,7 +166,11 @@ def add_hardcoded_test(filename):
 
     testcases = []
     # Open ../../test_cases/FILENAME.csv
-    with open(os.path.join(os.path.dirname(__file__), '..', '..', 'test_cases', filename + '.csv')) as f:
+    with open(
+        os.path.join(
+            os.path.dirname(__file__), "..", "..", "test_cases", filename + ".csv"
+        )
+    ) as f:
         reader = csv.reader(f)
         # Skip the header
         next(reader)
@@ -125,9 +182,14 @@ def add_hardcoded_test(filename):
             positionVector = [float(x) for x in row[9:12]]
             testcases.append(TestCaseHardCoded(rotationMatrix, positionVector))
     bot = TestBot(filename, robot, testcases)
-    setattr(TestHardcodedBots, 'test_' + filename, lambda self: self.check_hardcoded_robot(bot))
+    setattr(
+        TestHardcodedBots,
+        "test_" + filename,
+        lambda self: self.check_hardcoded_robot(bot),
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Generate classes for each general test case
     for filename in generalFilenames:
         add_general_test(filename)
