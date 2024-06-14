@@ -20,77 +20,29 @@ use {
     },
 };
 
-pub struct Irb6640 {
-    kin: Kinematics<6, 7>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
+macro_rules! define_struct {
+    ($name:ident, $num_joints:expr) => {
+        pub struct $name {
+            kin: Kinematics<$num_joints, {$num_joints+1}>,
+            r: Matrix3<f64>,
+            t: Vector3<f64>,
 
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
+            q: Vec<Vector6<f64>>,
+            is_ls: Vec<bool>,
+        }
+    };
 }
 
-pub struct KukaR800FixedQ3 {
-    kin: Kinematics<7, 8>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
+// Define all structures
+define_struct!(Irb6640, 6);
+define_struct!(KukaR800FixedQ3, 7);
+define_struct!(RrcFixedQ6, 7);
+define_struct!(YumiFixedQ3, 7);
+define_struct!(Ur5, 6);
+define_struct!(ThreeParallelBot, 6);
+define_struct!(TwoParallelBot, 6);
+define_struct!(SphericalBot, 6);
 
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
-}
-
-pub struct RrcFixedQ6 {
-    kin: Kinematics<7, 8>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
-
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
-}
-
-pub struct YumiFixedQ3 {
-    kin: Kinematics<7, 8>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
-
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
-}
-
-pub struct Ur5 {
-    kin: Kinematics<6, 7>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
-
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
-}
-
-pub struct ThreeParallelBot {
-    kin: Kinematics<6, 7>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
-
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
-}
-
-pub struct TwoParallelBot {
-    kin: Kinematics<6, 7>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
-
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
-}
-
-pub struct SphericalBot {
-    kin: Kinematics<6, 7>,
-    r: Matrix3<f64>,
-    t: Vector3<f64>,
-
-    q: Vec<Vector6<f64>>,
-    is_ls: Vec<bool>,
-}
 
 pub fn hardcoded_setup_from_string(raw: &str, r: &mut Matrix3<f64>, t: &mut Vector3<f64>) {
     let data: Vec<f64> = raw.split(',').map(|s| s.parse().unwrap()).collect();
@@ -283,19 +235,44 @@ impl SphericalBot {
     }
 }
 
+
+// Most of the implementations in SetupIk are the same, so we can use a macro to generate them.
+macro_rules! impl_setup_ik {
+    // Generate the function setup_from_str, write_output,ls_count, solution_count, name, and debug
+    ($name:ident) => {
+        fn setup_from_str(&mut self, raw: &str) {
+            hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
+        }
+
+        fn write_output(&self) -> String {
+            ik_write_output(&self.q)
+        }
+
+        fn ls_count(&self) -> usize {
+            self.is_ls.iter().filter(|b| **b).count()
+        }
+
+        fn solution_count(&self) -> usize {
+            self.is_ls.len()
+        }
+
+        fn name(&self) -> &'static str {
+            <$name as SetupStatic>::name()
+        }
+
+        fn debug(&self, i: usize) {
+            println!("{i}{}{}", self.r, self.t);
+        }
+    };
+}
+
 impl SetupIk for Irb6640 {
     fn setup(&mut self) {
         let q = Vector6::zeros().map(|_: f64| random_angle());
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(Irb6640);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = irb6640(&self.r, &self.t)
@@ -307,21 +284,6 @@ impl SetupIk for Irb6640 {
         }).reduce(f64::min).unwrap_or(NAN)
     }
 
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
 impl SetupIk for KukaR800FixedQ3 {
@@ -331,13 +293,7 @@ impl SetupIk for KukaR800FixedQ3 {
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(KukaR800FixedQ3);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = kuka_r800_fixed_q3(&self.r, &self.t);
@@ -360,21 +316,6 @@ impl SetupIk for KukaR800FixedQ3 {
         }).reduce(f64::min).unwrap_or(NAN)
     }
 
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
 impl SetupIk for RrcFixedQ6 {
@@ -384,13 +325,7 @@ impl SetupIk for RrcFixedQ6 {
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(RrcFixedQ6);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = rrc_fixed_q6(&self.r, &self.t);
@@ -413,21 +348,6 @@ impl SetupIk for RrcFixedQ6 {
         }).reduce(f64::min).unwrap_or(NAN)
     }
 
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
 impl SetupIk for YumiFixedQ3 {
@@ -437,13 +357,7 @@ impl SetupIk for YumiFixedQ3 {
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(YumiFixedQ3);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = yumi_fixed_q3(&self.r, &self.t);
@@ -466,21 +380,6 @@ impl SetupIk for YumiFixedQ3 {
         }).reduce(f64::min).unwrap_or(NAN)
     }
 
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
 impl SetupIk for Ur5 {
@@ -489,13 +388,7 @@ impl SetupIk for Ur5 {
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(Ur5);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = ur5(&self.r, &self.t);
@@ -506,22 +399,6 @@ impl SetupIk for Ur5 {
             calculate_ik_error(&self.kin, &self.r, &self.t, q)
         }).reduce(f64::min).unwrap_or(NAN)
     }
-
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
 impl SetupIk for ThreeParallelBot {
@@ -530,13 +407,7 @@ impl SetupIk for ThreeParallelBot {
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(ThreeParallelBot);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = three_parallel_bot(&self.r, &self.t);
@@ -547,22 +418,6 @@ impl SetupIk for ThreeParallelBot {
             calculate_ik_error(&self.kin, &self.r, &self.t, q)
         }).reduce(f64::min).unwrap_or(NAN)
     }
-
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
 impl SetupIk for TwoParallelBot {
@@ -571,13 +426,7 @@ impl SetupIk for TwoParallelBot {
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(TwoParallelBot);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = two_parallel_bot(&self.r, &self.t);
@@ -588,22 +437,6 @@ impl SetupIk for TwoParallelBot {
             calculate_ik_error(&self.kin, &self.r, &self.t, q)
         }).reduce(f64::min).unwrap_or(NAN)
     }
-
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
 impl SetupIk for SphericalBot {
@@ -612,13 +445,7 @@ impl SetupIk for SphericalBot {
         (self.r, self.t) = self.kin.forward_kinematics(&q);
     }
 
-    fn setup_from_str(&mut self, raw: &str) {
-        hardcoded_setup_from_string(raw, &mut self.r, &mut self.t);
-    }
-
-    fn write_output(&self) -> String {
-        ik_write_output(&self.q)
-    }
+    impl_setup_ik!(SphericalBot);
 
     fn run(&mut self) {
         (self.q, self.is_ls) = spherical_bot(&self.r, &self.t);
@@ -629,158 +456,40 @@ impl SetupIk for SphericalBot {
             calculate_ik_error(&self.kin, &self.r, &self.t, q)
         }).reduce(f64::min).unwrap_or(NAN)
     }
-
-    fn ls_count(&self) -> usize {
-        self.is_ls.iter().filter(|b| **b).count()
-    }
-
-    fn solution_count(&self) -> usize {
-        self.is_ls.len()
-    }
-
-    fn name(&self) -> &'static str {
-        <Self as SetupStatic>::name()
-    }
-
-    fn debug(&self, i: usize) {
-        println!("{i}{}{}", self.r, self.t);
-    }
 }
 
-impl SetupStatic for Irb6640 {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
 
-            q: Vec::new(),
-            is_ls: Vec::new(),
+
+// Do setup static as a macro to avoid repition
+macro_rules! impl_setup_static {
+    ($name:ident, $long_name:expr) => {
+        impl SetupStatic for $name {
+            fn new() -> Self {
+                Self {
+                    kin: Self::get_kin(),
+                    r: Matrix3::zeros(),
+                    t: Vector3::zeros(),
+
+                    q: Vec::new(),
+                    is_ls: Vec::new(),
+                }
+            }
+
+            fn name() -> &'static str {
+                $long_name
+            }
         }
-    }
-
-    fn name() -> &'static str {
-        "IRB 6640"
-    }
+    };
 }
 
-impl SetupStatic for KukaR800FixedQ3 {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
 
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
 
-            q: Vec::new(),
-            is_ls: Vec::new(),
-        }
-    }
-
-    fn name() -> &'static str {
-        "KUKA R800 Fixed Q3"
-    }
-}
-
-impl SetupStatic for RrcFixedQ6 {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
-
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
-
-            q: Vec::new(),
-            is_ls: Vec::new(),
-        }
-    }
-
-    fn name() -> &'static str {
-        "RRC Fixed Q6"
-    }
-}
-
-impl SetupStatic for Ur5 {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
-
-            q: Vec::new(),
-            is_ls: Vec::new(),
-        }
-    }
-
-    fn name() -> &'static str {
-        "UR5"
-    }
-}
-
-impl SetupStatic for ThreeParallelBot {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
-
-            q: Vec::new(),
-            is_ls: Vec::new(),
-        }
-    }
-
-    fn name() -> &'static str {
-        "Three Parallel Bot"
-    }
-}
-
-impl SetupStatic for TwoParallelBot {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
-
-            q: Vec::new(),
-            is_ls: Vec::new(),
-        }
-    }
-
-    fn name() -> &'static str {
-        "Two Parallel Bot"
-    }
-}
-
-impl SetupStatic for SphericalBot {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
-
-            q: Vec::new(),
-            is_ls: Vec::new(),
-        }
-    }
-
-    fn name() -> &'static str {
-        "Spherical Bot"
-    }
-}
-
-impl SetupStatic for YumiFixedQ3 {
-    fn new() -> Self {
-        Self {
-            kin: Self::get_kin(),
-            r: Matrix3::zeros(),
-            t: Vector3::zeros(),
-
-            q: Vec::new(),
-            is_ls: Vec::new(),
-        }
-    }
-
-    fn name() -> &'static str {
-        "Yumi Fixed Q3"
-    }
-}
+// Implement static setup for all the robots
+impl_setup_static!(Irb6640, "IRB 6640");
+impl_setup_static!(KukaR800FixedQ3, "KUKA R800 Fixed Q3");
+impl_setup_static!(RrcFixedQ6, "RRC Fixed Q6");
+impl_setup_static!(YumiFixedQ3, "Yumi Fixed Q3");
+impl_setup_static!(Ur5, "UR5");
+impl_setup_static!(ThreeParallelBot, "Three Parallel Bot");
+impl_setup_static!(TwoParallelBot, "Two Parallel Bot");
+impl_setup_static!(SphericalBot, "Spherical Bot");

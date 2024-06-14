@@ -54,10 +54,11 @@ zeroresult = [0.0] * 6
 epsilon = 1e-2
 
 
+np.random.seed(0)
+
 # Test the general robots
 class TestGeneralRobots(unittest.TestCase):
     def check_general_robot(self, bot):
-        print("Testing " + bot.casename)
         for configNum, testCase in enumerate(bot.testcases):
             hMatrix = np.reshape(testCase.hVals, (6, 3))
             pMatrix = np.reshape(testCase.pVals, (7, 3))
@@ -70,13 +71,22 @@ class TestGeneralRobots(unittest.TestCase):
             if bot.casename == "IK_gen_6_dof":
                 qVals = np.random.rand(5, 6) * 2 * pi
             for i, q in enumerate(qVals):
+                numTests += 1
                 # Get the forward kinematics result and then run inverse to see if we get the same thing
                 forward_kinematics = bot.robot.forward_kinematics(q)
                 rotation = np.array(forward_kinematics[0])
                 translation = np.array(forward_kinematics[1])
 
                 # Get the inverse kinematics
-                result = bot.robot.get_ik(forward_kinematics[0], forward_kinematics[1])
+                results = bot.robot.get_ik_sorted(forward_kinematics[0], forward_kinematics[1])
+
+                self.assertFalse(len(results) == 0, 
+                                 msg = f"Failed on test {i + 1} of {bot.casename} configuration {configNum + 1} with \nqVals: {str(q)} \
+                                    \nRotation matrix expected: \n{str(rotation)}\nTranslation expected: {str(translation)} \
+                                    \nhMatrix: \n{str(hMatrix)}\npMatrix: \n{str(pMatrix)} \
+                                    \nNo result was returned.")
+                result = results[0]
+                                 
 
                 # Run forward kinematics on the result to make sure it is the same as the input
                 resultForward = bot.robot.forward_kinematics(result[0])
@@ -93,7 +103,8 @@ class TestGeneralRobots(unittest.TestCase):
                         delta=epsilon,
                         msg=f"Failed on test {i + 1} of {bot.casename} configuration {configNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
                         \nRotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
-                        \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}",
+                        \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)} \
+                        \nhMatrix: \n{str(hMatrix)}\npMatrix: \n{str(pMatrix)}",
                     )
                 for resultVal, expectedVal in zip(translation, resultTranslation):
                     self.assertAlmostEqual(
@@ -101,11 +112,12 @@ class TestGeneralRobots(unittest.TestCase):
                         expectedVal,
                         delta=epsilon,
                         msg=f"Failed on test {i + 1} of {bot.casename} configuration {configNum + 1} with \nqVals: {str(q)}\n and result: {str(result[0])} \
-                                            \Rotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
-                                            \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)}",
+                                            \nRotation matrix expected: \n{str(rotation)}\nGot: \n{str(resultRotation)} \
+                                            \nTranslation expected: {str(translation)}\nGot: {str(resultTranslation)} \
+                                            \nhMatrix: \n{str(hMatrix)}\npMatrix: \n{str(pMatrix)}",
                     )
 
-
+                    
 def add_general_test(filename):
     # Setup the robot from the filename
     robot = ik_python.Robot(
@@ -143,7 +155,6 @@ def add_general_test(filename):
 
 class TestHardcodedBots(unittest.TestCase):
     def check_hardcoded_robot(self, bot):
-        print("Testing " + bot.casename)
         for testCase in bot.testcases:
             rotationMatrix = np.array(
                 [
@@ -153,9 +164,7 @@ class TestHardcodedBots(unittest.TestCase):
             )
             positionVector = testCase.positionVector
             result = bot.robot.get_ik(rotationMatrix, positionVector)
-            self.assertNotEqual(
-                result[0],
-                zeroresult,
+            self.assertFalse(len(result) == 0,
                 msg=f"Failed on {bot.casename} with rotation matrix: \n{rotationMatrix} and position vector: \n{positionVector}. \nNo result was returned.",
             )
 

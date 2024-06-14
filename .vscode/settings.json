@@ -56,7 +56,11 @@
     "cinttypes": "cpp",
     "typeinfo": "cpp",
     "dense": "cpp",
-    "polynomials": "cpp"
+    "polynomials": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "list": "cpp",
+    "numbers": "cpp"
   },
   "python.analysis.typeCheckingMode": "basic"
 }

@@ -1,0 +1,38 @@
+For these setups, the forward_kinematics function was not public, so for the start, I was just testing whether or not the target rotations and translations in test_cases even returned results.
+
+I'm not sure how the rotation matrices were flattened in the test_cases folder, I tried both setups and this one worked for more configurations so I went with it.
+
+Here are the ones that didn't return any results:
+
+RRC_fixed_q6:
+
+rotation matrix: 
+[[-0.91241883  0.39766253 -0.09672847]
+ [ 0.01078113 -0.21291399 -0.97701146]
+ [-0.40911569 -0.8924865   0.18997948]]
+position vector: 
+[0.274528149652083, 0.69131468964002, 0.0657458362625618]
+
+-------------------------------------------------------------
+two_parallel_bot:
+
+rotation matrix: 
+[[ 0.42145123  0.90035456 -0.10835371]
+ [-0.72632581  0.26359409 -0.63479837]
+ [-0.54298221  0.34623665  0.76504281]] 
+position vector: 
+[-3.26859626237022, -0.401344432555163, 3.89646331637997]
+
+-------------------------------------------------------------
+yumi_fixed_q3:
+
+rotation matrix: 
+[[ 0.02531544 -0.9752333   0.21972516]
+ [ 0.79802434 -0.11266525 -0.59199974]
+ [ 0.60209325  0.19033276  0.77540774]] 
+position vector: 
+[0.266339682522742, 0.172417594903718, 0.68311822370677]
+
+------------------
+The other ones robots returned results on all of the tests in the test_cases folder, although the outputs rarely matched up with the expected q values.  
+I assume this is because they were generated with different code, however, and I assume multiple different q vectors can lead to the same output.
