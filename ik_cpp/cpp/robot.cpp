@@ -9,8 +9,8 @@ void Robot::set_kinematics(double h_matrix[6][3], double p_matrix[7][3]) {
     set_robot_kinematics(this->robot, h_matrix, p_matrix);
 }
 
-void Robot::get_ik(double rotation_matrix[3][3], double position_vector[3], double q_out[6], bool* is_ls_out) {
-    get_robot_ik(this->robot, rotation_matrix, position_vector, q_out, is_ls_out);
+void Robot::get_ik(double rotation_matrix[3][3], double position_vector[3], double * q_out[6], bool** is_ls_out, size_t * num_outputs) {
+    get_robot_ik(this->robot, rotation_matrix, position_vector, q_out, is_ls_out, num_outputs);
 }
 
 void Robot::get_fk(double q[6], double rot_matrix_out[3][3], double pos_vector_out[3]) {

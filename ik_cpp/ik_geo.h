@@ -31,7 +31,7 @@ namespace ik_geo {
              * @param q_out The output joint angles
              * @param is_ls_out The output for whether the solution is least squares
              */
-            void get_ik(double rotation_matrix[3][3], double position_vector[3], double q_out[6], bool* is_ls_out);
+            void get_ik(double rotation_matrix[3][3], double position_vector[3], double * q_out[6], bool** is_ls_out, size_t * num_outputs);
 
 
             /**

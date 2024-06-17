@@ -10,6 +10,8 @@ void run_ik_hardcoded() {
     
     // Create the robot from a string
     Robot ur5("ur5");
+    // Equivalent to:
+    // Robot ur5 = Robot::ur5();
 
     double rotation_matrix[3][3] = {
         {1.0, 0.0, 0.0},
@@ -18,17 +20,25 @@ void run_ik_hardcoded() {
     };
     double position_vector[3] = {0.0, 0.0, 0.0};
 
-    double q[6];
-    bool is_ls;
+    double * q;
+    bool * is_ls;
+    size_t len;
     // Run ik, outputs to q and is_ls
-    ur5.get_ik(rotation_matrix, position_vector, q, &is_ls);
+    ur5.get_ik(rotation_matrix, position_vector, &q, &is_ls, &len);
 
-    std::cout << "q: ";
-    for (int i = 0; i < 6; i++) {
-        std::cout << q[i] << " ";
+    for (size_t i = 0; i < len; i++) {
+        std::cout << "Solution " << i << ": ";
+        if (is_ls[i]) {
+            std::cout << "(Least squares)" << std::endl;
+        } else {
+            std::cout << "(Exact)" << std::endl;
+        }
+        for (size_t j = 0; j < 6; j++) {
+            std::cout << q[i * 6 + j] << " ";
+        }
+        
+        std::cout << std::endl << std::endl;
     }
-
-    std::cout << "\nis_ls: " << is_ls << std::endl;    
 }
 
 void run_ik_general() {
@@ -72,18 +82,25 @@ void run_ik_general() {
     };
     double position_vector[3] = {0, 0, 0};
 
-    double q[6];
-    bool is_ls;
-
+    double * q;
+    bool * is_ls;
+    size_t len;
     std::cout << "Running inverse kinematics for SphericalTwoIntersecting" << std::endl;
-    robot.get_ik(rotation_matrix, position_vector, q, &is_ls);
+    robot.get_ik(rotation_matrix, position_vector, &q, &is_ls, &len);
 
-    std::cout << "q: ";
-    for (int i = 0; i < 6; i++) {
-        std::cout << q[i] << " ";
+    for (size_t i = 0; i < len; i++) {
+        std::cout << "Solution " << i << ": ";
+        if (is_ls[i]) {
+            std::cout << "(Least squares)" << std::endl;
+        } else {
+            std::cout << "(Exact)" << std::endl;
+        }
+        for (size_t j = 0; j < 6; j++) {
+            std::cout << q[i * 6 + j] << " ";
+        }
+        
+        std::cout << std::endl << std::endl;
     }
-
-    std::cout << "\nis_ls: " << is_ls << std::endl;
 
 
 }

@@ -147,7 +147,7 @@ impl _RustRobot {
         &mut self,
         rot_matrix: [[f64; 3]; 3],
         trans_matrix: [f64; 3],
-    ) -> ([f64; 6], bool) {
+    ) -> (Vec<Vector6<f64>>, Vec<bool>) {
         // Convert the input to the correct types
         let mut rotation = Matrix3::zeros();
         // Fill rotation matrix
@@ -161,7 +161,7 @@ impl _RustRobot {
         let q: Vec<Vector6<f64>>;
         let is_ls: Vec<bool>;
         if self.is_hardcoded {
-            (q, is_ls) = (self.hardcoded_solver)(&rotation, &translation);
+            (self.hardcoded_solver)(&rotation, &translation)
         } else {
             // Make sure kinematics are set before calling the general solver
             if !self.kin_set {
@@ -169,17 +169,9 @@ impl _RustRobot {
                     "Kinematics must be set before calling the general solver",
                 );
             }
-            (q, is_ls) = (self.general_solver)(&rotation, &translation, &self.kin)
+            (self.general_solver)(&rotation, &translation, &self.kin)
         }
-        let mut ret_vals = [0.0; 6];
-        let mut is_least_squares = true;
-        if q.len() > 0 {
-            for i in 0..6 {
-                ret_vals[i] = q[0][i];
-            }
-            is_least_squares = is_ls[0];
-        }
-        (ret_vals, is_least_squares)
+        
     }
 
     fn forward_kinematics(&self, q: [f64; 6]) -> ([[f64; 3]; 3], [f64; 3]) {
@@ -333,9 +325,9 @@ pub extern "C" fn set_robot_kinematics(robot_in: *mut _RustRobot, h_vals: *const
 
 
 #[no_mangle]
-// return_q is a pointer to a 6 element array of f64
-// is_ls is a pointer to a bool that will be set to true if the solution is a least squares solution
-pub extern "C" fn get_robot_ik(robot_in: *mut _RustRobot, rot_matrix_ptr: *const f64, t_vec_ptr: *const f64, return_q: *mut f64, return_is_ls: *mut bool) {
+// return_q is a pointer to an array of 6 element vectors of f64
+// is_ls is a pointer to an array of bools that will be set to true if the solution is a least squares solution
+pub extern "C" fn get_robot_ik(robot_in: *mut _RustRobot, rot_matrix_ptr: *const f64, t_vec_ptr: *const f64, return_q: *mut *mut f64, return_is_ls: *mut *mut bool, return_len: *mut usize) {
     let mut robot = unsafe {
         Box::from_raw(robot_in)
     };
@@ -356,16 +348,28 @@ pub extern "C" fn get_robot_ik(robot_in: *mut _RustRobot, rot_matrix_ptr: *const
         t_vec
     };
     let (q, is_ls) = robot.get_ik(rot_matrix, t_vec);
-    for i in 0..6 {
-        unsafe {
-            *return_q.add(i) = q[i];
-        }
-    }
-    unsafe {
-        *return_is_ls = is_ls;
-    }
     // Prevent double free
     std::mem::forget(robot);
+
+    // Output into the return pointers
+    let mut q_out = Vec::with_capacity(q.len() * 6);
+    let mut is_ls_out = Vec::with_capacity(is_ls.len());
+    for i in 0..q.len() {
+        for j in 0..6 {
+            q_out.push(q[i][j]);
+        }
+        is_ls_out.push(is_ls[i]);
+    }
+    let q_ptr = q_out.as_mut_ptr();
+    let is_ls_ptr = is_ls_out.as_mut_ptr();
+    let len = q.len();
+    std::mem::forget(q_out);
+    std::mem::forget(is_ls_out);
+    unsafe {
+        *return_q = q_ptr;
+        *return_is_ls = is_ls_ptr;
+        *return_len = len;
+    }
 }
 
 #[no_mangle]

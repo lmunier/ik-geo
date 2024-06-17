@@ -34,8 +34,8 @@ add_dependencies(ik_object ik_cpp)
 
 if (WIN32)
     target_link_libraries(ik_object
-        debug "${CMAKE_SOURCE_DIR}/rust-wrapper/target/debug/libik_cpp.a"
-        optimized "${CMAKE_SOURCE_DIR}/rust-wrapper/target/release/libik_cpp.a"
+        debug "${CMAKE_SOURCE_DIR}/rust-wrapper/target/debug/libik_cpp.lib"
+        optimized "${CMAKE_SOURCE_DIR}/rust-wrapper/target/release/libik_cpp.lib"
         ws2_32 userenv advapi32)
 else ()
     target_link_libraries(ik_object
@@ -56,12 +56,23 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/dist)
 add_library(ik_geo STATIC $<TARGET_OBJECTS:ik_object>)
 # add_library(ik_geo_dynamic SHARED $<TARGET_OBJECTS:ik_object>)
 
+# Build a windows static library as well
+
 
 # Custom command to copy libik_cpp.a to the dist folder
-add_custom_command(TARGET ik_geo POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_SOURCE_DIR}/rust-wrapper/target/release/libik_cpp.a"
-    "${CMAKE_BINARY_DIR}/dist/libik_cpp.a")
+if (WIN32)
+    add_custom_command(TARGET ik_geo POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_SOURCE_DIR}/rust-wrapper/target/debug/libik_cpp.lib"
+            "${CMAKE_BINARY_DIR}/dist/libik_cpp.lib"
+    )
+else()
+    add_custom_command(TARGET ik_geo POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/rust-wrapper/target/release/libik_cpp.a"
+        "${CMAKE_BINARY_DIR}/dist/libik_cpp.a"
+    )
+endif()
 
 # Copy ik_geo.h to the dist folder
 add_custom_command(TARGET ik_geo POST_BUILD

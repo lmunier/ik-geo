@@ -8,11 +8,15 @@ find_library(ik_geo libik_geo.so PATHS lib)
 add_executable(${PROJECT_NAME} main.cpp)
 
 
-# Include the .so files in the include folder
-target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/libik_geo.a)
-
-# Include libik_cpp.a
-target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/libik_cpp.a)
+# Include the static libraries in the lib folder
+# Note that win32 means windows in general, not just 32 bit
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/libik_geo.lib)
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/libik_cpp.lib)
+else()
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/libik_geo.a)
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/libik_cpp.a)
+endif()
 
 
 include_directories(${CMAKE_SOURCE_DIR}/include)

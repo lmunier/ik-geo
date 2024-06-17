@@ -13,4 +13,4 @@ CMakeUserPresets.json
 rust-wrapper/target
 rust-wrapper/tmp
 ik_cpp-stamp
-*.so
+*.a

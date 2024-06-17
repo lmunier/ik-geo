@@ -11,7 +11,7 @@ extern "C" {
     void set_robot_kinematics(_RustRobot* robot, double h_matrix[6][3], double p_matrix[7][3]);
 
     // Get the inverse kinematics
-    void get_robot_ik(_RustRobot* robot, double rotation_matrix[3][3], double position_vector[3], double* q, bool* is_ls);
+    void get_robot_ik(_RustRobot* robot, double rotation_matrix[3][3], double position_vector[3], double ** q_out, bool** is_ls_out, size_t * num_outputs);
 
     // Forward kinematics
     void forward_kinematics(_RustRobot* robot, double q[6], double rot_matrix_out[3][3], double pos_vector_out[3]);
@@ -66,10 +66,11 @@ namespace ik_geo {
              * Get the inverse kinematics
              * @param rotation_matrix The rotation matrix
              * @param position_vector The position vector
-             * @param q_out The output joint angles
-             * @param is_ls_out The output for whether the solution is least squares
+             * @param q_out Array of 6-vectors representing output joint angles
+             * @param is_ls_out Array of bools for whether each solution is least squares
+             * @param num_outputs The number of output solutions
              */
-            void get_ik(double rotation_matrix[3][3], double position_vector[3], double q_out[6], bool* is_ls_out);
+            void get_ik(double rotation_matrix[3][3], double position_vector[3], double * q_out[6], bool** is_ls_out, size_t * num_outputs);
 
 
             /**
