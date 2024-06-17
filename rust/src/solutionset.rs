@@ -1,6 +1,6 @@
 use {
     crate::subproblems::setups::DELTA,
-    std::fmt::{ Display, Formatter, Result, Debug },
+    std::fmt::{Debug, Display, Formatter, Result},
 };
 
 #[derive(Debug, Clone)]
@@ -56,12 +56,7 @@ impl<T: Copy> SolutionSet2<T> {
     }
 
     pub fn deltas() -> [(f64, f64); DELTAS_SIZE_2] {
-        [
-            (-DELTA, 0.0),
-            (DELTA, 0.0),
-            (0.0, -DELTA),
-            (0.0, DELTA),
-        ]
+        [(-DELTA, 0.0), (DELTA, 0.0), (0.0, -DELTA), (0.0, DELTA)]
     }
 
     pub fn duplicated(&self) -> Self {
@@ -83,7 +78,11 @@ impl<T: Copy> SolutionSet2<T> {
 
 impl<T: Copy + Debug> SolutionSet2<T> {
     pub fn as_csv(&self) -> String {
-        let mut results = self.get_all().into_iter().map(|v| format!("{v:?}")).collect::<Vec<String>>();
+        let mut results = self
+            .get_all()
+            .into_iter()
+            .map(|v| format!("{v:?}"))
+            .collect::<Vec<String>>();
         results.append(&mut vec![String::new(); 2 - results.len()]);
         results.join(",")
     }
@@ -93,7 +92,7 @@ impl<T: Copy + Debug> SolutionSet2<T> {
             0 => Self::Zero,
             1 => Self::One(vec[0]),
             2 => Self::Two(vec[0], vec[1]),
-            i => panic!("Vector {vec:?} contains too many solutions: {i}")
+            i => panic!("Vector {vec:?} contains too many solutions: {i}"),
         }
     }
 }
@@ -163,7 +162,11 @@ impl<T: Copy> SolutionSet4<T> {
 
 impl<T: Copy + Debug> SolutionSet4<T> {
     pub fn as_csv(&self) -> String {
-        let mut results = self.get_all().into_iter().map(|v| format!("{v:?}")).collect::<Vec<String>>();
+        let mut results = self
+            .get_all()
+            .into_iter()
+            .map(|v| format!("{v:?}"))
+            .collect::<Vec<String>>();
         results.append(&mut vec![String::new(); 4 - results.len()]);
         results.join(",")
     }
@@ -175,7 +178,7 @@ impl<T: Copy + Debug> SolutionSet4<T> {
             2 => Self::Two(vec[0], vec[1]),
             3 => Self::Three(vec[0], vec[1], vec[2]),
             4 => Self::Four(vec[0], vec[1], vec[2], vec[3]),
-            i => panic!("Vector {vec:?} contains too many solutions: {i}")
+            i => panic!("Vector {vec:?} contains too many solutions: {i}"),
         }
     }
 }

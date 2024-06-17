@@ -1,7 +1,10 @@
 use {
-    std::{ env, collections::HashMap },
-    linear_subproblem_solutions_rust::inverse_kinematics::hardcoded::{ irb6640, kuka_r800_fixed_q3, rrc_fixed_q6, ur5, three_parallel_bot, two_parallel_bot, spherical_bot, yumi_fixed_q3 },
-    nalgebra::{ Matrix3, Vector3, Vector6 },
+    linear_subproblem_solutions_rust::inverse_kinematics::hardcoded::{
+        irb6640, kuka_r800_fixed_q3, rrc_fixed_q6, spherical_bot, three_parallel_bot,
+        two_parallel_bot, ur5, yumi_fixed_q3,
+    },
+    nalgebra::{Matrix3, Vector3, Vector6},
+    std::{collections::HashMap, env},
 };
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]
@@ -45,7 +48,9 @@ fn parse_args(robot_lookup: &HashMap<&str, Robot>) -> Result<DemoArgs, String> {
     let mut args = env::args().skip(1);
 
     let robot = args.next().ok_or("No robot specified".to_owned())?;
-    let robot = *robot_lookup.get(&robot[..]).ok_or(format!("Invalid robot {robot:?}"))?;
+    let robot = *robot_lookup
+        .get(&robot[..])
+        .ok_or(format!("Invalid robot {robot:?}"))?;
 
     let mut r = Vec::new();
     let mut t = Vec::new();
@@ -64,7 +69,13 @@ fn parse_args(robot_lookup: &HashMap<&str, Robot>) -> Result<DemoArgs, String> {
     Ok(DemoArgs { robot, r, t })
 }
 
-fn compute_ik(demo_args: DemoArgs, function_lookup: &HashMap<Robot, fn(r: &Matrix3<f64>, t: &Vector3<f64>) -> (Vec<Vector6<f64>>, Vec<bool>)>) -> (Vec<Vector6<f64>>, Vec<bool>) {
+fn compute_ik(
+    demo_args: DemoArgs,
+    function_lookup: &HashMap<
+        Robot,
+        fn(r: &Matrix3<f64>, t: &Vector3<f64>) -> (Vec<Vector6<f64>>, Vec<bool>),
+    >,
+) -> (Vec<Vector6<f64>>, Vec<bool>) {
     function_lookup.get(&demo_args.robot).unwrap()(&demo_args.r, &demo_args.t)
 }
 
@@ -95,14 +106,30 @@ macro_rules! create_lookups {
 
 fn main() {
     let (robot_lookup, function_lookup) = create_lookups!(
-        "irb-6640", Robot::Irb6640, irb6640,
-        "kuka-r800-fixed-q3", Robot::KukaR800FixedQ3, kuka_r800_fixed_q3,
-        "rrc-fixed-q6", Robot::RrcFixedQ6, rrc_fixed_q6,
-        "yumi-fixed-q3", Robot::YumiFixedQ3, yumi_fixed_q3,
-        "ur5", Robot::Ur5, ur5,
-        "three-parallel-bot", Robot::ThreeParallelBot, three_parallel_bot,
-        "two-parallel-bot", Robot::TwoParallelBot, two_parallel_bot,
-        "spherical-bot", Robot::SphericalBot, spherical_bot,
+        "irb-6640",
+        Robot::Irb6640,
+        irb6640,
+        "kuka-r800-fixed-q3",
+        Robot::KukaR800FixedQ3,
+        kuka_r800_fixed_q3,
+        "rrc-fixed-q6",
+        Robot::RrcFixedQ6,
+        rrc_fixed_q6,
+        "yumi-fixed-q3",
+        Robot::YumiFixedQ3,
+        yumi_fixed_q3,
+        "ur5",
+        Robot::Ur5,
+        ur5,
+        "three-parallel-bot",
+        Robot::ThreeParallelBot,
+        three_parallel_bot,
+        "two-parallel-bot",
+        Robot::TwoParallelBot,
+        two_parallel_bot,
+        "spherical-bot",
+        Robot::SphericalBot,
+        spherical_bot,
     );
 
     let mut args = env::args();
@@ -114,7 +141,7 @@ fn main() {
         if s != "--help" {
             match parse_args(&robot_lookup) {
                 Ok(demo_args) => display_ik_result(compute_ik(demo_args, &function_lookup)),
-                Err(s) => eprintln!("ERROR: {s}\nRun with \"--help\" for usage information")
+                Err(s) => eprintln!("ERROR: {s}\nRun with \"--help\" for usage information"),
             }
 
             return;

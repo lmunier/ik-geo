@@ -1,26 +1,13 @@
 use {
+    super::auxiliary::{random_angle, random_norm_vector3, random_vector3, rot},
     crate::{
+        solutionset::{SolutionSet2, SolutionSet4},
         subproblems::{
-            subproblem1,
-            subproblem2,
-            subproblem2extended,
-            subproblem3,
-            subproblem4,
-            subproblem5,
+            subproblem1, subproblem2, subproblem2extended, subproblem3, subproblem4, subproblem5,
             subproblem6,
         },
-
-        solutionset::{ SolutionSet2, SolutionSet4 },
     },
-
-    super::auxiliary::{
-        random_vector3,
-        random_norm_vector3,
-        random_angle,
-        rot,
-    },
-
-    nalgebra::{ Vector3, Vector2 },
+    nalgebra::{Vector2, Vector3},
 };
 
 pub const DELTA: f64 = 1e-12;
@@ -77,7 +64,6 @@ pub struct Subproblem2ExtendedSetup {
     theta1: f64,
     theta2: f64,
 }
-
 
 pub struct Subproblem3Setup {
     p1: Vector3<f64>,
@@ -206,9 +192,7 @@ impl Subproblem3Setup {
     fn calculate_error(&self, theta: &[f64]) -> f64 {
         theta
             .iter()
-            .map(|&t| {
-                ((self.p2 - rot(&self.k, t) * self.p1).norm() - self.d).abs()
-            })
+            .map(|&t| ((self.p2 - rot(&self.k, t) * self.p1).norm() - self.d).abs())
             .sum()
     }
 }
@@ -234,10 +218,9 @@ impl Subproblem4Setup {
     fn calculate_error(&self, theta: &[f64]) -> f64 {
         theta
             .iter()
-            .map(|&t| {
-                ((self.h.transpose() * rot(&self.k, t) * self.p)[0] - self.d).abs()
-            })
-            .sum::<f64>() / theta.len() as f64
+            .map(|&t| ((self.h.transpose() * rot(&self.k, t) * self.p)[0] - self.d).abs())
+            .sum::<f64>()
+            / theta.len() as f64
     }
 }
 
@@ -327,8 +310,8 @@ impl SetupDynamic for Subproblem1Setup {
         let error = self.error();
         let error_check = error - DELTA;
 
-        self.calculate_error(self.theta + DELTA) >= error_check &&
-        self.calculate_error(self.theta - DELTA) >= error_check
+        self.calculate_error(self.theta + DELTA) >= error_check
+            && self.calculate_error(self.theta - DELTA) >= error_check
     }
 
     fn name(&self) -> &'static str {
@@ -384,7 +367,11 @@ impl SetupDynamic for Subproblem2Setup {
     fn error(&self) -> f64 {
         let theta = self.theta.get_all();
         let len = theta.len();
-        theta.into_iter().map(|t| self.calculate_error(t)).sum::<f64>() / len as f64
+        theta
+            .into_iter()
+            .map(|t| self.calculate_error(t))
+            .sum::<f64>()
+            / len as f64
     }
 
     fn is_at_local_min(&self) -> bool {
@@ -440,16 +427,19 @@ impl SetupDynamic for Subproblem2ExtendedSetup {
     }
 
     fn run(&mut self) {
-        (self.theta1, self.theta2) = subproblem2extended(&self.p0, &self.p1, &self.p2, &self.k1, &self.k2);
+        (self.theta1, self.theta2) =
+            subproblem2extended(&self.p0, &self.p1, &self.p2, &self.k1, &self.k2);
     }
 
     fn run_report_info(&mut self) -> bool {
-        (self.theta1, self.theta2) = subproblem2extended(&self.p0, &self.p1, &self.p2, &self.k1, &self.k2);
+        (self.theta1, self.theta2) =
+            subproblem2extended(&self.p0, &self.p1, &self.p2, &self.k1, &self.k2);
         false
     }
 
     fn error(&self) -> f64 {
-        (self.p0 + rot(&self.k1, self.theta1) * self.p1 - rot(&self.k2, self.theta2) * self.p2).norm()
+        (self.p0 + rot(&self.k1, self.theta1) * self.p1 - rot(&self.k2, self.theta2) * self.p2)
+            .norm()
     }
 
     fn is_at_local_min(&self) -> bool {
@@ -625,7 +615,8 @@ impl SetupDynamic for Subproblem5Setup {
 
         self.theta = SolutionSet4::One((theta1, theta2, theta3));
 
-        self.p0 = -(rot(&self.k1, theta1) * self.p1 - rot(&self.k2, theta2) * (self.p2 + rot(&self.k3, theta3) * self.p3));
+        self.p0 = -(rot(&self.k1, theta1) * self.p1
+            - rot(&self.k2, theta2) * (self.p2 + rot(&self.k3, theta3) * self.p3));
     }
 
     fn setup_ls(&mut self) {
@@ -649,11 +640,15 @@ impl SetupDynamic for Subproblem5Setup {
     }
 
     fn run(&mut self) {
-        self.theta = subproblem5(&self.p0, &self.p1, &self.p2, &self.p3, &self.k1, &self.k2, &self.k3);
+        self.theta = subproblem5(
+            &self.p0, &self.p1, &self.p2, &self.p3, &self.k1, &self.k2, &self.k3,
+        );
     }
 
     fn run_report_info(&mut self) -> bool {
-        self.theta = subproblem5(&self.p0, &self.p1, &self.p2, &self.p3, &self.k1, &self.k2, &self.k3);
+        self.theta = subproblem5(
+            &self.p0, &self.p1, &self.p2, &self.p3, &self.k1, &self.k2, &self.k3,
+        );
         false
     }
 
@@ -668,9 +663,12 @@ impl SetupDynamic for Subproblem5Setup {
         theta
             .into_iter()
             .map(|(t1, t2, t3)| {
-                (self.p0 + rot(&self.k1, t1) * self.p1 - rot(&self.k2, t2) * (self.p2 + rot(&self.k3, t3) * self.p3)).norm()
+                (self.p0 + rot(&self.k1, t1) * self.p1
+                    - rot(&self.k2, t2) * (self.p2 + rot(&self.k3, t3) * self.p3))
+                    .norm()
             })
-            .sum::<f64>() / len as f64
+            .sum::<f64>()
+            / len as f64
     }
 
     fn is_at_local_min(&self) -> bool {
@@ -691,21 +689,21 @@ impl SetupDynamic for Subproblem6Setup {
         self.k = [Vector3::zeros(); 4];
         self.p = [Vector3::zeros(); 4];
 
-        for (h, (k, p)) in self.h.iter_mut().zip(self.k.iter_mut().zip(self.p.iter_mut())) {
+        for (h, (k, p)) in self
+            .h
+            .iter_mut()
+            .zip(self.k.iter_mut().zip(self.p.iter_mut()))
+        {
             *h = random_norm_vector3();
             *k = random_norm_vector3();
             *p = random_vector3();
         }
 
-        self.d1 = (
-            self.h[0].transpose() * rot(&self.k[0], theta1) * self.p[0] +
-            self.h[1].transpose() * rot(&self.k[1], theta2) * self.p[1]
-        )[0];
+        self.d1 = (self.h[0].transpose() * rot(&self.k[0], theta1) * self.p[0]
+            + self.h[1].transpose() * rot(&self.k[1], theta2) * self.p[1])[0];
 
-        self.d2 = (
-            self.h[2].transpose() * rot(&self.k[2], theta1) * self.p[2] +
-            self.h[3].transpose() * rot(&self.k[3], theta2) * self.p[3]
-        )[0];
+        self.d2 = (self.h[2].transpose() * rot(&self.k[2], theta1) * self.p[2]
+            + self.h[3].transpose() * rot(&self.k[3], theta2) * self.p[3])[0];
 
         self.theta = SolutionSet4::One((theta1, theta2));
     }
@@ -742,23 +740,11 @@ impl SetupDynamic for Subproblem6Setup {
     }
 
     fn run(&mut self) {
-        self.theta = subproblem6(
-            &self.h,
-            &self.k,
-            &self.p,
-            self.d1,
-            self.d2,
-        );
+        self.theta = subproblem6(&self.h, &self.k, &self.p, self.d1, self.d2);
     }
 
     fn run_report_info(&mut self) -> bool {
-        self.theta = subproblem6(
-            &self.h,
-            &self.k,
-            &self.p,
-            self.d1,
-            self.d2,
-        );
+        self.theta = subproblem6(&self.h, &self.k, &self.p, self.d1, self.d2);
         false
     }
 
@@ -766,12 +752,21 @@ impl SetupDynamic for Subproblem6Setup {
         let theta = self.theta.get_all();
         let len = theta.len();
 
-        theta.into_iter().map(|(t1, t2)| {
-            (Vector2::new(
-                (self.h[0].transpose() * rot(&self.k[0], t1) * self.p[0] + self.h[1].transpose() * rot(&self.k[1], t2) * self.p[1])[0] - self.d1,
-                (self.h[2].transpose() * rot(&self.k[2], t1) * self.p[2] + self.h[3].transpose() * rot(&self.k[3], t2) * self.p[3])[0] - self.d2
-            )).norm()
-        }).sum::<f64>() / len as f64
+        theta
+            .into_iter()
+            .map(|(t1, t2)| {
+                (Vector2::new(
+                    (self.h[0].transpose() * rot(&self.k[0], t1) * self.p[0]
+                        + self.h[1].transpose() * rot(&self.k[1], t2) * self.p[1])[0]
+                        - self.d1,
+                    (self.h[2].transpose() * rot(&self.k[2], t1) * self.p[2]
+                        + self.h[3].transpose() * rot(&self.k[3], t2) * self.p[3])[0]
+                        - self.d2,
+                ))
+                .norm()
+            })
+            .sum::<f64>()
+            / len as f64
     }
 
     fn is_at_local_min(&self) -> bool {

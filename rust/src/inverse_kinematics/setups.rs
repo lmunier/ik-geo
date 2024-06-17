@@ -1,33 +1,15 @@
 use {
-    nalgebra::{ Vector3, Vector6, Matrix3, Matrix3x6 },
-
-    crate::subproblems::{
-        setups::SetupStatic,
-
-        auxiliary::{
-            random_vector3,
-            random_norm_vector3,
-            random_angle,
-        },
-    },
-
-    std::f64::NAN,
-
     super::{
-        auxiliary::{
-            Kinematics,
-            Matrix3x7,
-        },
-
-        spherical_two_parallel,
-        spherical_two_intersecting,
-        spherical,
-        three_parallel_two_intersecting,
-        three_parallel,
-        two_parallel,
-        two_intersecting,
-        gen_six_dof,
+        auxiliary::{Kinematics, Matrix3x7},
+        gen_six_dof, spherical, spherical_two_intersecting, spherical_two_parallel, three_parallel,
+        three_parallel_two_intersecting, two_intersecting, two_parallel,
     },
+    crate::subproblems::{
+        auxiliary::{random_angle, random_norm_vector3, random_vector3},
+        setups::SetupStatic,
+    },
+    nalgebra::{Matrix3, Matrix3x6, Vector3, Vector6},
+    std::f64::NAN,
 };
 
 pub trait SetupIk {
@@ -65,13 +47,22 @@ define_struct!(TwoParallelSetup);
 define_struct!(TwoIntersectingSetup);
 define_struct!(GenSixDofSetup);
 
-
-pub fn calculate_ik_error(kin: &Kinematics<6, 7>, r: &Matrix3<f64>, t: &Vector3<f64>, q: &Vector6<f64>) -> f64 {
+pub fn calculate_ik_error(
+    kin: &Kinematics<6, 7>,
+    r: &Matrix3<f64>,
+    t: &Vector3<f64>,
+    q: &Vector6<f64>,
+) -> f64 {
     let (r_t, t_t) = kin.forward_kinematics(q);
     (r_t - r).norm() + (t_t - t).norm()
 }
 
-fn ik_setup_from_string(raw: &str, kin: &mut Kinematics<6, 7>, r: &mut Matrix3<f64>, t: &mut Vector3<f64>) {
+fn ik_setup_from_string(
+    raw: &str,
+    kin: &mut Kinematics<6, 7>,
+    r: &mut Matrix3<f64>,
+    t: &mut Vector3<f64>,
+) {
     let data: Vec<f64> = raw.split(',').map(|s| s.parse().unwrap()).collect();
 
     kin.h = Matrix3x6::from_columns(&[
@@ -94,22 +85,21 @@ fn ik_setup_from_string(raw: &str, kin: &mut Kinematics<6, 7>, r: &mut Matrix3<f
     ]);
 
     *r = Matrix3::new(
-        data[39], data[40], data[41],
-        data[42], data[43], data[44],
-        data[45], data[46], data[47],
+        data[39], data[40], data[41], data[42], data[43], data[44], data[45], data[46], data[47],
     );
 
-    *t = Vector3::new(
-        data[48],
-        data[49],
-        data[50]
-    );
+    *t = Vector3::new(data[48], data[49], data[50]);
 }
 
 pub fn ik_write_output(q: &Vec<Vector6<f64>>) -> String {
     q.iter()
-        .map(|q| q.iter().map(|x| x.to_string())
-        .collect::<Vec<String>>().join(",")).collect::<Vec<String>>()
+        .map(|q| {
+            q.iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>()
+                .join(",")
+        })
+        .collect::<Vec<String>>()
         .join(",")
 }
 
@@ -138,13 +128,14 @@ macro_rules! impl_setup_static {
 impl_setup_static!(SphericalTwoParallelSetup, "Spherical two Parallel");
 impl_setup_static!(SphericalTwoIntersectingSetup, "Spherical Two Intersecting");
 impl_setup_static!(SphericalSetup, "Spherical");
-impl_setup_static!(ThreeParallelTwoIntersectingSetup, "Three Parallel Two Intersecting");
+impl_setup_static!(
+    ThreeParallelTwoIntersectingSetup,
+    "Three Parallel Two Intersecting"
+);
 impl_setup_static!(ThreeParallelSetup, "Three Parallel");
 impl_setup_static!(TwoParallelSetup, "Two Parallel");
 impl_setup_static!(TwoIntersectingSetup, "Two Intersecting");
 impl_setup_static!(GenSixDofSetup, "Gen Six DOF");
-
-
 
 // Most of the implementations in SetupIk are the same, so we can use a macro to generate them.
 macro_rules! impl_setup_ik {
@@ -159,23 +150,25 @@ macro_rules! impl_setup_ik {
         }
 
         fn error(&self) -> f64 {
-            self.q.iter().map(|q| {
-                calculate_ik_error(&self.kin, &self.r, &self.t, q)
-            }).reduce(f64::min).unwrap_or(NAN)
+            self.q
+                .iter()
+                .map(|q| calculate_ik_error(&self.kin, &self.r, &self.t, q))
+                .reduce(f64::min)
+                .unwrap_or(NAN)
         }
-    
+
         fn ls_count(&self) -> usize {
             self.is_ls.iter().filter(|b| **b).count()
         }
-    
+
         fn solution_count(&self) -> usize {
             self.is_ls.len()
         }
-    
+
         fn name(&self) -> &'static str {
             <Self as SetupStatic>::name()
         }
-    
+
         fn debug(&self, i: usize) {
             println!("{i}\nr{}t{}h{}p{}", self.r, self.t, self.kin.h, self.kin.p);
         }

@@ -37,3 +37,4 @@ octave-workspace
 *.out
 
 .mypy_cache/
+.vscode

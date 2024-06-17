@@ -9,13 +9,8 @@ This workflow will not currently run as the test cases fail, but to run it anywa
 ## To build/develop
 
 This requires [PyO3 maturin](https://pyo3.rs/v0.21.2/) to be installed.
-
-In the `ik_geo_python` directory, you can run this to install it:
-```bash
-python -m venv .env
-source .env/bin/activate
-pip install maturin
-```
+This package can be installed with `pip install ik-geo`, 
+or from the this directory with `pip install .`
 
 If you plan on developing, you can do it within the python virtual environment, or outside.
 When inside, you can use the command `maturin develop` and it will automatically install in your environment.
@@ -24,8 +19,6 @@ Outisde of the virtual environment, you can use the following command to build a
 
 
 ## To use
-
-Import the `ik_geo_python` package in your code
 
 The API documentation is at `ik_geo_python.pyi`, and there will be typechecking with mypy installed.
 

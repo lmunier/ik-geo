@@ -6,116 +6,92 @@ class KinematicsObject:
     """
     Representation of the kinematics for the robot
 
-    :param hMatrix: The h matrix to use (array of vectors of rotation axes)
-    :param pMatrix: The p matrix to use (array of vectors of displacements between joints)
+    Args:
+        h_matrix: The h matrix to use (array of vectors of rotation axes)
+        p_matrix: The p matrix to use (array of vectors of displacements between joints)
     """
 
     def __init__(
         self,
-        hMatrix: (
+        h_matrix: (
             Annotated[NDArray[np.generic], Literal[6, 3]]
             | Annotated[List[List[float]], [6, 3]]
         ),
-        pMatrix: (
+        p_matrix: (
             Annotated[NDArray[np.generic], Literal[7, 3]]
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> None: ...
 
+RobotType = (
+    Literal["Irb6640"]
+    | Literal["KukaR800FixedQ3"]
+    | Literal["Ur5"]
+    | Literal["ThreeParallelBot"]
+    | Literal["TwoParallelBot"]
+    | Literal["RrcFixedQ6"]
+    | Literal["SphericalBot"]
+    | Literal["YumiFixedQ3"]
+    | Literal["SphericalTwoParallel"]
+    | Literal["SphericalTwoIntersecting"]
+    | Literal["Spherical"]
+    | Literal["ThreeParallelTwoIntersecting"]
+    | Literal["ThreeParallel"]
+    | Literal["TwoParallel"]
+    | Literal["TwoIntersecting"]
+    | Literal["GenSixDof"]
+)
+
 class Robot:
     """
     Representation of the robot for inverse kinematics
 
-    :param robotType: The type of robot to create, either a specific hardcoded bot or a general type of bot
-    Options for robotType: Irb6640, KukaR800FixedQ3, Ur5, ThreeParallelBot, TwoParallelBot, RrcFixedQ6, SphericalBot, YumiFixedQ3,
-    SphericalTwoParallel, SphericalTwoIntersecting, Spherical, ThreeParallelTwoIntersecting, ThreeParallel, TwoParallel, TwoIntersecting, GenSixDof
+    Args:
+        robot_type: The type of robot to create, either a specific hardcoded bot or a general type of bot
     """
 
-    def __init__(
-        self,
-        robotType: (
-            Literal["Irb6640"]
-            | Literal["KukaR800FixedQ3"]
-            | Literal["Ur5"]
-            | Literal["ThreeParallelBot"]
-            | Literal["TwoParallelBot"]
-            | Literal["RrcFixedQ6"]
-            | Literal["SphericalBot"]
-            | Literal["YumiFixedQ3"]
-            | Literal["SphericalTwoParallel"]
-            | Literal["SphericalTwoIntersecting"]
-            | Literal["Spherical"]
-            | Literal["ThreeParallelTwoIntersecting"]
-            | Literal["ThreeParallel"]
-            | Literal["TwoParallel"]
-            | Literal["TwoIntersecting"]
-            | Literal["GenSixDof"]
-        ),
-    ) -> None: ...
+    def __init__(self, robot_type: RobotType) -> None: ...
     @classmethod
     def set_kinematics(cls, kinematics: KinematicsObject) -> None:
         """
         Set the kinematics object for the robot
 
-        :param kinematics: The kinematics object to use
+
+        Args:
+            kinematics: The kinematic description of the robot
         """
-        ...
 
     def get_ik(
         self,
-        rotationMatrix: (
+        R: (
             Annotated[NDArray[np.generic], Literal[3, 3]]
             | Annotated[List[List[float]], [3, 3]]
         ),
-        positionVector: (
-            Annotated[NDArray[np.generic], Literal[3]] | Annotated[List[float], [3]]
-        ),
-    ) -> List[Tuple[List[float], bool]]:
+        t: Annotated[NDArray[np.generic], Literal[3]] | Annotated[List[float], [3]],
+    ) -> Tuple[List[float], bool]:
         """
-        Get the inverse kinematics for the robot
+        Compute the inverse kinematics solutions for the robot.
 
-        :param rotationMatrix: The rotation matrix to use for the inverse kinematics
-        :param positionVector: The position vector to use for the inverse kinematics
-        :return: A list of solutions, each containing the rotation values of each joint and whether the solution is least squares.
-
+        Args:
+            R: The rotation matrix to use for the inverse kinematics
+            t: The position vector to use for the inverse kinematics
+        Returns:
+            A tuple containing the rotation values of each joint and whether the solution is least squares
         """
-        ...
-
-    def get_ik_sorted(
-        self,
-        rotationMatrix: (
-            Annotated[NDArray[np.generic], Literal[3, 3]]
-            | Annotated[List[List[float]], [3, 3]]
-        ),
-        positionVector: (
-            Annotated[NDArray[np.generic], Literal[3]] | Annotated[List[float], [3]]
-        ),
-    ) -> List[Tuple[List[float], float, bool]]:
-        """
-        Get the inverse kinematics for the robot
-
-        ONLY IMPLEMENTED FOR GENERAL ROBOTS
-
-        :param rotationMatrix: The rotation matrix to use for the inverse kinematics
-        :param positionVector: The position vector to use for the inverse kinematics
-        :return: A list of solutions, each containing the rotation values of each joint, the error of this setup, and whether the solution is least squares.
-          These solutions are sorted by error, with the best solution first.
-
-        """
-        ...
 
     def forward_kinematics(
         self,
-        qVals: Annotated[List[float], [6]] | Annotated[NDArray[np.generic], Literal[6]],
+        q: Annotated[List[float], [6]] | Annotated[NDArray[np.generic], Literal[6]],
     ) -> Tuple[List[List[float]], List[float]]:
         """
         Get the forward kinematics for the robot, not implemented for hardcoded bots
 
-        :param qVals: The rotation values of each joint
-        :return: A tuple containing the rotation matrix and position vector
+        Args:
+            q: The rotation values of each joint
+        Returns:
+            A tuple containing the rotation matrix and position vector
         """
-        ...
-    # Factory methods for each robot type
+
     @classmethod
     def irb6640(cls) -> "Robot":
         return cls("Irb6640")

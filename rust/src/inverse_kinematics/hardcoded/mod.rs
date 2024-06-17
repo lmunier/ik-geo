@@ -1,9 +1,15 @@
 pub mod setups;
 
 use {
-    self::setups::{ Irb6640, KukaR800FixedQ3, Ur5, ThreeParallelBot, TwoParallelBot, RrcFixedQ6, SphericalBot, YumiFixedQ3 },
-    super::{ spherical_two_parallel, spherical_two_intersecting, three_parallel_two_intersecting, three_parallel, two_parallel, two_intersecting, spherical, gen_six_dof },
-    nalgebra::{ Matrix3, Vector3, Vector6 },
+    self::setups::{
+        Irb6640, KukaR800FixedQ3, RrcFixedQ6, SphericalBot, ThreeParallelBot, TwoParallelBot, Ur5,
+        YumiFixedQ3,
+    },
+    super::{
+        gen_six_dof, spherical, spherical_two_intersecting, spherical_two_parallel, three_parallel,
+        three_parallel_two_intersecting, two_intersecting, two_parallel,
+    },
+    nalgebra::{Matrix3, Vector3, Vector6},
 };
 
 pub fn irb6640(r: &Matrix3<f64>, t: &Vector3<f64>) -> (Vec<Vector6<f64>>, Vec<bool>) {

@@ -1,79 +1,22 @@
 use crate::{
-    subproblems::setups::{
-        SetupDynamic,
-        SetupStatic,
-        Subproblem1Setup,
-        Subproblem2Setup,
-        Subproblem2ExtendedSetup,
-        Subproblem3Setup,
-        Subproblem4Setup,
-        Subproblem5Setup,
-        Subproblem6Setup,
-    },
-
     inverse_kinematics::{
-        setups::{
-            SphericalTwoParallelSetup,
-            SphericalTwoIntersectingSetup,
-            SphericalSetup,
-            ThreeParallelTwoIntersectingSetup,
-            SetupIk,
-            ThreeParallelSetup,
-            TwoParallelSetup,
-            TwoIntersectingSetup,
-            GenSixDofSetup,
-        },
-
         hardcoded::setups::{
-            Irb6640,
-            KukaR800FixedQ3,
-            RrcFixedQ6,
-            Ur5,
-            ThreeParallelBot,
-            TwoParallelBot,
-            SphericalBot,
-            YumiFixedQ3
+            Irb6640, KukaR800FixedQ3, RrcFixedQ6, SphericalBot, ThreeParallelBot, TwoParallelBot,
+            Ur5, YumiFixedQ3,
         },
+        setups::{
+            GenSixDofSetup, SetupIk, SphericalSetup, SphericalTwoIntersectingSetup,
+            SphericalTwoParallelSetup, ThreeParallelSetup, ThreeParallelTwoIntersectingSetup,
+            TwoIntersectingSetup, TwoParallelSetup,
+        },
+    },
+    subproblems::setups::{
+        SetupDynamic, SetupStatic, Subproblem1Setup, Subproblem2ExtendedSetup, Subproblem2Setup,
+        Subproblem3Setup, Subproblem4Setup, Subproblem5Setup, Subproblem6Setup,
     },
 };
 
-#[cfg(link_ikfast)]
-use crate::ikfast::IkFast;
-
 const TEST_ITERATIONS: usize = 1000;
-
-#[cfg(link_ikfast)]
-#[test]
-fn ikfast_tests() {
-    let mut setup = IkFast::new();
-
-    let mut total_error = 0.0;
-    let mut num_iterations = 0;
-    let mut nan_count = 0;
-
-    for _ in 0..TEST_ITERATIONS {
-        setup.setup();
-        setup.run();
-
-        let error = setup.error();
-
-        if error.is_nan() {
-            nan_count += 1;
-        }
-        else {
-            // assert!(error <= ERROR_THRESHOLD, "{} error was at: {:.2e}", setup.name(), error);
-            total_error += error;
-            num_iterations += 1;
-        }
-    }
-
-    let avg_err = total_error / (num_iterations) as f64;
-    let nan_percent = nan_count as f64 * 100.0 / TEST_ITERATIONS as f64;
-
-    println!("{}", setup.name());
-    println!("\tAvg min Error:\t{avg_err:.2e}");
-    println!("\t% NaN:\t{nan_percent:.2}");
-}
 
 #[test]
 fn run_tests() {
@@ -96,7 +39,6 @@ fn run_tests() {
         Box::new(TwoParallelSetup::new()),
         Box::new(TwoIntersectingSetup::new()),
         Box::new(GenSixDofSetup::new()),
-
         Box::new(Irb6640::new()),
         Box::new(KukaR800FixedQ3::new()),
         Box::new(RrcFixedQ6::new()),
@@ -125,8 +67,7 @@ fn run_tests() {
 
             if error.is_nan() {
                 nan_count += 1;
-            }
-            else {
+            } else {
                 // assert!(error <= ERROR_THRESHOLD, "{} error was at: {:.2e}", setup.name(), error);
                 total_error += error;
                 num_iterations += 1;
@@ -161,15 +102,16 @@ fn run_tests() {
 
             if error.is_nan() {
                 nan_count += 1;
-            }
-            else {
+            } else {
                 // assert!(error <= ERROR_THRESHOLD, "{} error was at: {:.2e}", setup.name(), error);
                 total_error += error;
                 num_iterations += 1;
 
                 num_q_ls += n_ls;
                 total_q_count += n_sol;
-                if n_ls == n_sol { num_all_ls += 1 }
+                if n_ls == n_sol {
+                    num_all_ls += 1
+                }
             }
         }
 
@@ -200,7 +142,11 @@ fn run_tests_ls() {
             setup.setup_ls();
             setup.run();
 
-            assert!(setup.is_at_local_min(), "{} solution was not at local minimum", setup.name());
+            assert!(
+                setup.is_at_local_min(),
+                "{} solution was not at local minimum",
+                setup.name()
+            );
         }
     }
 }

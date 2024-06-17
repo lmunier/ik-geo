@@ -7,10 +7,10 @@ use linear_subproblem_solutions_rust::inverse_kinematics::auxiliary::Kinematics;
 use linear_subproblem_solutions_rust::inverse_kinematics::hardcoded::*;
 use linear_subproblem_solutions_rust::inverse_kinematics::{
     gen_six_dof, spherical, spherical_two_intersecting, spherical_two_parallel, three_parallel,
-    three_parallel_two_intersecting, two_intersecting, two_parallel
+    three_parallel_two_intersecting, two_intersecting, two_parallel,
 };
 
-use::linear_subproblem_solutions_rust::inverse_kinematics::hardcoded::setups::*;
+use linear_subproblem_solutions_rust::inverse_kinematics::hardcoded::setups::*;
 
 use linear_subproblem_solutions_rust::inverse_kinematics::setups::calculate_ik_error;
 
@@ -170,13 +170,10 @@ impl Robot {
         let translation = Vector3::from_row_slice(&trans_vec);
         let q: Vec<Vector6<f64>>;
         let is_ls: Vec<bool>;
-        
 
         // Start a timer
-        
+
         (q, is_ls) = call_ik_solver(self, rotation, translation);
-        
-        
 
         let mut ret_vals = Vec::new();
         for i in 0..q.len() {
@@ -195,13 +192,6 @@ impl Robot {
         rot_matrix: [[f64; 3]; 3],
         trans_vec: [f64; 3],
     ) -> PyResult<Vec<([f64; 6], f64, bool)>> {
-        if !self.kin_set && self.is_hardcoded {
-            return Err(PyValueError::new_err(
-                "get_ik_sorted is not supported for hardcoded robots, run get_ik instead",
-            ));
-        }
-
-
         let mut rotation = Matrix3::zeros();
         // Fill rotation matrix
         for i in 0..3 {
@@ -216,13 +206,14 @@ impl Robot {
         let solutions = call_ik_solver(self, rotation, translation);
 
         // Get the errors of each solution
-        let mut solutions_with_errors : Vec<([f64; 6], f64, bool)> = Vec::<([f64; 6], f64, bool)>::new();
+        let mut solutions_with_errors: Vec<([f64; 6], f64, bool)> =
+            Vec::<([f64; 6], f64, bool)>::new();
         for i in 0..solutions.0.len() {
             let q = solutions.0[i];
             let is_ls = solutions.1[i];
 
             // Calculate the error, assuming it's 0 if it's not a least squares solution
-            let mut error : f64 = 0.0;
+            let mut error: f64 = 0.0;
             if is_ls {
                 error = calculate_ik_error(&self.kin, &rotation, &translation, &q);
             }
@@ -241,7 +232,6 @@ impl Robot {
         Ok(solutions_with_errors)
     }
 
-    
     pub fn forward_kinematics(&self, q: [f64; 6]) -> PyResult<([[f64; 3]; 3], [f64; 3])> {
         if !self.kin_set && !self.is_hardcoded {
             return Err(PyValueError::new_err(
@@ -257,7 +247,7 @@ impl Robot {
             q_vec[i] = q[i];
         }
         let (r, p) = self.kin.forward_kinematics(&q_vec);
-        
+
         let mut r_vals = [[0.0; 3]; 3];
         let mut p_vals = [0.0; 3];
         for i in 0..3 {
@@ -363,9 +353,12 @@ fn dummy_solver_general(
     panic!("This function should never be called");
 }
 
-
 // Unexposed method to call the correct ik solver
-fn call_ik_solver(robot : &mut Robot, rot_matrix: Matrix3<f64>, trans_vec : Vector3<f64>) -> (Vec<Vector6<f64>>, Vec<bool>) {
+fn call_ik_solver(
+    robot: &mut Robot,
+    rot_matrix: Matrix3<f64>,
+    trans_vec: Vector3<f64>,
+) -> (Vec<Vector6<f64>>, Vec<bool>) {
     if robot.is_hardcoded {
         (robot.hardcoded_solver)(&rot_matrix, &trans_vec)
     } else {
