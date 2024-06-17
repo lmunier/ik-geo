@@ -418,7 +418,7 @@ impl KinematicsObject {
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn ik_geo_python(_py: Python, m: &PyModule) -> PyResult<()> {
+fn ik_geo(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Robot>()?;
     m.add_class::<KinematicsObject>()?;
     Ok(())

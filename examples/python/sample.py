@@ -1,4 +1,4 @@
-import ik_geo_python as ik_geo
+import ik_geo
 
 # Sample assumes you have numpy installed globally
 import numpy as np

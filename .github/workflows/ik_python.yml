@@ -1,23 +1,23 @@
-# If anything in the ik_geo_python or rust folders change on push, run the workflow in the ik_geo_python folder
+# If anything in the ik_python or rust folders change on push, run the workflow in the ik_python folder
 on:
   push:
     branches:
         - main
         - master
     paths:
-      - 'ik_geo_python/**'
+      - 'ik_python/**'
       - 'rust/**'
   pull_request:
     branches:
         - main
         - master
     paths:
-      - 'ik_geo_python/**'
+      - 'ik_python/**'
       - 'rust/**'
   workflow_dispatch:
 defaults:
     run:
-        working-directory: ik_geo_python
+        working-directory: ik_python
 jobs:
     test:
       runs-on: ubuntu-latest
@@ -31,13 +31,13 @@ jobs:
           with:
             target: x86_64
             command: build
-            working-directory: ik_geo_python
+            working-directory: ik_python
             args: --release --out dist --find-interpreter
             sccache: 'true'
         - name: Test wheels
           run: |
             python -m pip install --upgrade pip
-            python -m pip install dist/ik_geo_python*.whl
+            python -m pip install dist/ik_geo*.whl
             python -m pip install numpy
             python test/test.py 2>&1 | egrep "FAILED|ERROR" && exit 1 || exit 0
           continue-on-error: false
@@ -71,12 +71,12 @@ jobs:
               args: --release --out dist --find-interpreter
               sccache: 'true'
               manylinux: auto
-              working-directory: ik_geo_python
+              working-directory: ik_python
           - name: Upload wheels
             uses: actions/upload-artifact@v4
             with:
               name: wheels-linux-${{ matrix.platform.target }}
-              path: ik_geo_python/dist
+              path: ik_python/dist
     windows:
         needs: test
         runs-on: ${{ matrix.platform.runner }}
@@ -99,12 +99,12 @@ jobs:
               target: ${{ matrix.platform.target }}
               args: --release --out dist --find-interpreter
               sccache: 'true'
-              working-directory: ik_geo_python
+              working-directory: ik_python
           - name: Upload wheels
             uses: actions/upload-artifact@v4
             with:
               name: wheels-windows-${{ matrix.platform.target }}
-              path: ik_geo_python/dist
+              path: ik_python/dist
     
     macos:
         needs: test
@@ -127,12 +127,12 @@ jobs:
               target: ${{ matrix.platform.target }}
               args: --release --out dist --find-interpreter
               sccache: 'true'
-              working-directory: ik_geo_python
+              working-directory: ik_python
           - name: Upload wheels
             uses: actions/upload-artifact@v4
             with:
               name: wheels-macos-${{ matrix.platform.target }}
-              path: ik_geo_python/dist
+              path: ik_python/dist
     
     sdist:
         needs: test
@@ -144,12 +144,12 @@ jobs:
             with:
               command: sdist
               args: --out dist
-              working-directory: ik_geo_python
+              working-directory: ik_python
           - name: Upload sdist
             uses: actions/upload-artifact@v4
             with:
               name: wheels-sdist
-              path: ik_geo_python/dist
+              path: ik_python/dist
     release:
         name: Release
         runs-on: ubuntu-latest

@@ -35,7 +35,7 @@ hardcodedFilenames = [
 from collections import namedtuple
 import numpy as np
 import unittest
-import ik_geo_python as ik_geo
+import ik_geo
 from math import pi
 
 # Import the csv files
