@@ -4,7 +4,7 @@ This is a python api for the rust implementation of inverse kinematics using PyO
 
 There is a GitHub workflow in `../.github/workflows` to automatically build this when any changes are made in this folder or to the Rust implementation  
 If the commit or pull request is tagged for release, it will also publish to PyPI, so long as the `PYPI_API_TOKEN` secret is set in the GitHub project.  
-This workflow will not currently run as the test cases fail, but to run it anyway, comment out all instances of `needs: test` in the `ik_geo_python.yml` workflow file
+This workflow will not currently run as the test cases fail, but to run it anyway, comment out all instances of `needs: test` in the `ik_python.yml` workflow file
 
 ## To build/develop
 
@@ -20,7 +20,7 @@ Outisde of the virtual environment, you can use the following command to build a
 
 ## To use
 
-The API documentation is at `ik_geo_python.pyi`, and there will be typechecking with mypy installed.
+The API documentation is at `ik_geo.pyi`, and there will be typechecking with mypy installed.
 
 Look at `examples/sample.py` for sample usage
 
