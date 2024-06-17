@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -10,7 +9,6 @@ use linear_subproblem_solutions_rust::inverse_kinematics::{
     three_parallel_two_intersecting, two_intersecting, two_parallel,
 };
 
-use linear_subproblem_solutions_rust::inverse_kinematics::hardcoded::setups::*;
 
 use linear_subproblem_solutions_rust::inverse_kinematics::setups::calculate_ik_error;
 
