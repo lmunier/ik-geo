@@ -456,7 +456,7 @@ pub fn two_parallel(
         error
     };
 
-    let q1_vec = search_1d(error_given_q1, -PI, PI, 200);
+    let q1_vec = search_1d(error_given_q1, -PI, PI);
 
     for (q1, i) in q1_vec {
         let t64 = t64_given_q1(r_06, kin, q1, &p_16).get_all();
@@ -558,7 +558,7 @@ pub fn two_intersecting(
         error
     };
 
-    let q4_vec = search_1d(alignment_error_given_q4, -PI, PI, 200);
+    let q4_vec = search_1d(alignment_error_given_q4, -PI, PI);
 
     for (q4, i) in q4_vec {
         let q_partial: Vector4<f64> = q_partial_given_q4(q4, kin, &p_16).column(i).into();

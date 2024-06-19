@@ -50,15 +50,16 @@ TestCaseHardCoded = namedtuple(
 
 zeroresult = [0.0] * 6
 
-epsilon = 1e-2
+epsilon = 1e-3
 
 
-np.random.seed(0)
+
 
 
 # Test the general robots
 class TestGeneralRobots(unittest.TestCase):
     def check_general_robot(self, bot):
+        np.random.seed(0)
         for configNum, testCase in enumerate(bot.testcases):
             hMatrix = np.reshape(testCase.hVals, (6, 3))
             pMatrix = np.reshape(testCase.pVals, (7, 3))

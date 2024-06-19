@@ -9,6 +9,7 @@ use {
         consts::{PI, TAU},
         INFINITY, NAN,
     },
+    nlopt::{Algorithm, Nlopt},
 };
 
 pub type Matrix3x7<T> = Matrix<T, U3, U7, ArrayStorage<T, 3, 7>>;
@@ -85,85 +86,69 @@ pub fn wrap_to_pi(theta: f64) -> f64 {
     (theta + PI).rem_euclid(TAU) - PI
 }
 
-fn find_zero<const N: usize, F: Fn(f64) -> Vector<f64, N>>(
+pub fn search_1d<const N: usize, F: Fn(f64) -> Vector<f64, N> > (
     f: F,
     left: f64,
-    right: f64,
-    i: usize,
-) -> Option<f64> {
-    const ITERATIONS: usize = 100;
-    const EPSILON: f64 = 1e-5;
+    right: f64
+) -> Vec<(f64, usize)> {
 
-    let mut x_left = left;
-    let mut x_right = right;
+    let mut results : Vec<(f64,usize)> = Vec::new();
+    let max_evals = [50, 200, 1000, 2000];
+    let populations = [10, 30, 200, 400];
+    let epsilon = 1e-8;
 
-    let mut y_left = f(x_left)[i];
-    let mut y_right = f(x_right)[i];
+    // Implement send with f
+    // f.clone();
+    // let f = f.clone();
+    
+    // Do some iterative deepening
+    for (max_eval, population) in core::iter::zip(max_evals, populations) { 
+        for i in 0..N {
+            // TODO: parallelize this, there are 4 branches that don't depend on each other
+            // Problems occur trying to multithread this due to the closure not being thread-safe.
 
-    for _ in 0..ITERATIONS {
-        let delta = y_right - y_left;
+            let cost_function = |x: &[f64], _gradient: Option<&mut [f64]>, _params: &mut ()| {
+                let err = f(x[0])[i];
+                err * err
+            };
 
-        if delta.abs() < EPSILON {
+            
+            let mut optimizer = Nlopt::new(
+                Algorithm::GnMlslLds,
+                1,
+                cost_function,
+                nlopt::Target::Minimize, ());
+
+
+            let mut x = [(left + right) / 2.0];
+            optimizer.set_upper_bounds(&[right]).unwrap();
+            optimizer.set_lower_bounds(&[left]).unwrap();
+            optimizer.set_xtol_abs(&[epsilon]).unwrap();
+            optimizer.set_stopval(epsilon).unwrap();
+            optimizer.set_maxeval(max_eval).unwrap();
+            optimizer.set_population(population).unwrap();
+            
+            let result = optimizer.optimize(&mut x);
+            // Check for error
+            if let Err(e) = result {
+                // Didn't optimize, no zero on this branch
+                println!("Error: {:?}", e);
+                continue;
+            }
+            // Get the error
+            let error = result.unwrap().1;
+
+            if error < epsilon {
+                results.push((x[0], i));
+            }
+            
+        }
+        if results.len() > 0 {
             break;
         }
-
-        let x_0 = x_left - y_left * (x_right - x_left) / delta;
-        let y_0 = f(x_0)[i];
-
-        if !y_0.is_finite() {
-            return None;
-        }
-
-        if (y_left < 0.0) != (y_0 < 0.0) {
-            x_left = x_0;
-            y_left = y_0;
-        } else {
-            x_right = x_0;
-            y_right = y_0;
-        }
     }
+    results
 
-    if left <= x_left && x_left <= right {
-        Some(x_left)
-    } else {
-        None
-    }
-}
-
-pub fn search_1d<const N: usize, F: Fn(f64) -> Vector<f64, N>>(
-    f: F,
-    left: f64,
-    right: f64,
-    initial_samples: usize,
-) -> Vec<(f64, usize)> {
-    const CROSS_THRESHOLD: f64 = 0.1;
-
-    let delta = (right - left) / initial_samples as f64;
-
-    let mut last_v = f(left);
-    let mut x = left + delta;
-
-    let mut zeros = Vec::with_capacity(8);
-
-    for _ in 0..initial_samples {
-        let v = f(x);
-
-        for (i, (&y, &last_y)) in v.iter().zip(last_v.into_iter()).enumerate() {
-            if (y < 0.0) != (last_y < 0.0)
-                && y.abs() < CROSS_THRESHOLD
-                && last_y.abs() < CROSS_THRESHOLD
-            {
-                if let Some(z) = find_zero(&f, x - delta, x, i) {
-                    zeros.push((z, i));
-                }
-            }
-        }
-
-        last_v = v;
-        x += delta;
-    }
-
-    zeros
 }
 
 struct ProblemParams<const N: usize, F: Fn(f64, f64) -> Vector<f64, N>> {
@@ -186,6 +171,7 @@ pub fn search_2d<const N: usize, F: Fn(f64, f64) -> Vector<f64, N>>(
     max: (f64, f64),
     n: usize,
 ) -> Vec<(f64, f64, usize)> {
+    // TODO: replace this with MLSL algorithm
     fn minimum<const N: usize>(
         mesh: &Vec<Vector<f64, N>>,
         n: usize,
