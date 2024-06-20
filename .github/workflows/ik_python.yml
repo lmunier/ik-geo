@@ -51,19 +51,15 @@ jobs:
                 target: x86_64
               - runner: ubuntu-latest
                 target: x86
-              - runner: ubuntu-latest
-                target: aarch64
-              - runner: ubuntu-latest
-                target: armv7
-              - runner: ubuntu-latest
-                target: s390x
-              - runner: ubuntu-latest
-                target: ppc64le
+              # - runner: ubuntu-latest
+              #   target: aarch64
+              # - runner: ubuntu-latest
+              #   target: armv7
+              # - runner: ubuntu-latest
+              #   target: s390x
+              # - runner: ubuntu-latest
+              #   target: ppc64le
         steps:
-              # workaround for broken clang on ubuntu runner until https://github.com/actions/runner-images/issues/8659 get fixed
-          - uses: mjp41/workaround8649@7929373c0fe5caf844d8115adccef39e3b5362e7
-            with:
-              os: ${{ matrix.platform.runner }}
           - uses: actions/checkout@v4
           - uses: actions/setup-python@v5
             with:
