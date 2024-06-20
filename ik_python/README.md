@@ -1,6 +1,6 @@
 # IK-Geo
 This is a fork from [IK-Geo](https://github.com/rpiRobotics/ik-geo).
-See the full repository [here](https://github.com/Verdant-Evolution/ik-geo).
+See the full fork [here](https://github.com/Verdant-Evolution/ik-geo).
 
 Inverse kinematics and subproblem solutions from ["IK-Geo: Unified Robot Inverse Kinematics Using Subproblem Decomposition"](https://arxiv.org/abs/2211.05737) implemented in MATLAB, C++, Rust, and Python. We also include examples and timing tests.  IK-Geo is the fastest general IK solver based on published literature. In this unifying approach, IK for any 6-DOF all-revolute (6R) manipulator is decomposed into six canonical geometric subproblems solved by intersecting circles with other geometric objects. . IK-Geo finds all IK solutions including singular solutions and sometimes least-squares solutions by solving for subproblem solutions in all cases, including in a continuous and sometimes least-squares sense when a solution does not exist.
 
