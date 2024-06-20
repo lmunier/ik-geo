@@ -52,10 +52,6 @@ zeroresult = [0.0] * 6
 
 epsilon = 1e-2
 
-
-
-
-
 # Test the general robots
 class TestGeneralRobots(unittest.TestCase):
     def check_general_robot(self, bot):
@@ -67,7 +63,7 @@ class TestGeneralRobots(unittest.TestCase):
             bot.robot.set_kinematics(kinematics)
 
             # Generate 20 random robot configurations
-            qVals = np.random.rand(20, 6) * 2 * pi - pi 
+            qVals = np.random.rand(20, 6) * 2 * pi - pi
             # Generate fewer for the 6 dof bot because it is slower
             if bot.casename == "IK_gen_6_dof":
                 qVals = np.random.rand(5, 6) * 2 * pi - pi
