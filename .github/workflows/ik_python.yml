@@ -51,14 +51,14 @@ jobs:
                 target: x86_64
               - runner: ubuntu-latest
                 target: x86
-              # - runner: ubuntu-latest
-              #   target: aarch64
-              # - runner: ubuntu-latest
-              #   target: armv7
-              # - runner: ubuntu-latest
-              #   target: s390x
-              # - runner: ubuntu-latest
-              #   target: ppc64le
+              - runner: ubuntu-latest
+                target: aarch64
+              - runner: ubuntu-latest
+                target: armv7
+              - runner: ubuntu-latest
+                target: s390x
+              - runner: ubuntu-latest
+                target: ppc64le
         steps:
           - uses: actions/checkout@v4
           - uses: actions/setup-python@v5
@@ -72,6 +72,8 @@ jobs:
               sccache: 'true'
               manylinux: auto
               working-directory: ik_python
+            env:
+              CC: gcc
           - name: Upload wheels
             uses: actions/upload-artifact@v4
             with:

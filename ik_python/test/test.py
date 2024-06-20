@@ -48,8 +48,6 @@ TestCaseHardCoded = namedtuple(
     "TestCaseHardCoded", ["rotationMatrix", "positionVector"]
 )
 
-zeroresult = [0.0] * 6
-
 epsilon = 1e-2
 
 # Test the general robots
