@@ -670,7 +670,7 @@ pub fn gen_six_dof(
         error
     };
 
-    let minima = search_2d(alignment_error_given_q12, (-PI, -PI), (PI, PI), 100);
+    let minima = search_2d(alignment_error_given_q12, (-PI, -PI), (PI, PI));
 
     for (x0, x1, k) in minima {
         let (q_i, q_is_ls) = q_given_q12_k(x0, x1, k, &p16, r_06, kin);

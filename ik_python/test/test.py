@@ -59,7 +59,7 @@ epsilon = 1e-2
 # Test the general robots
 class TestGeneralRobots(unittest.TestCase):
     def check_general_robot(self, bot):
-        np.random.seed(0)
+        np.random.seed(100)
         for configNum, testCase in enumerate(bot.testcases):
             hMatrix = np.reshape(testCase.hVals, (6, 3))
             pMatrix = np.reshape(testCase.pVals, (7, 3))
