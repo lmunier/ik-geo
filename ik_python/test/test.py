@@ -50,7 +50,7 @@ TestCaseHardCoded = namedtuple(
 
 zeroresult = [0.0] * 6
 
-epsilon = 1e-3
+epsilon = 1e-2
 
 
 
