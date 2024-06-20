@@ -1,10 +1,27 @@
-# IK PYTHON
+# IK-Geo
+This is a fork from [IK-Geo](https://github.com/rpiRobotics/ik-geo).
+See the full repository [here](https://github.com/Verdant-Evolution/ik-geo).
 
-This is a python api for the rust implementation of inverse kinematics using PyO3 maturin
+Inverse kinematics and subproblem solutions from ["IK-Geo: Unified Robot Inverse Kinematics Using Subproblem Decomposition"](https://arxiv.org/abs/2211.05737) implemented in MATLAB, C++, Rust, and Python. We also include examples and timing tests.  IK-Geo is the fastest general IK solver based on published literature. In this unifying approach, IK for any 6-DOF all-revolute (6R) manipulator is decomposed into six canonical geometric subproblems solved by intersecting circles with other geometric objects. . IK-Geo finds all IK solutions including singular solutions and sometimes least-squares solutions by solving for subproblem solutions in all cases, including in a continuous and sometimes least-squares sense when a solution does not exist.
 
-There is a GitHub workflow in `../.github/workflows` to automatically build this when any changes are made in this folder or to the Rust implementation  
-If the commit or pull request is tagged for release, it will also publish to PyPI, so long as the `PYPI_API_TOKEN` secret is set in the GitHub project.  
-This workflow will not currently run as the test cases fail, but to run it anyway, comment out all instances of `needs: test` in the `ik_python.yml` workflow file
+We also connect our geometric method with polynomial-based method: 1D and 2D search solutions may be converted to a polynomial in the tangent half-angle of one joint. Examples are found in the [subproblem-polynomial](https://github.com/rpiRobotics/subproblem-polynomial) repo.
+
+For 7-DOF inverse kinematics using the Shoulder-Elbow-Wrist (SEW) angle, please see the [stereo-sew](https://github.com/rpiRobotics/stereo-sew) repo.
+
+For diagrams, see the [matlab-diagrams](https://github.com/aelias36/matlab-diagrams) repo.
+
+## Python wrapper
+
+This is a python wrapper for the Rust implementation of inverse kinematics using PyO3 maturin.  It is implemented [here](https://github.com/Verdant-Evolution/ik-geo/tree/main/ik_python)
+
+## To install
+
+This can be installed with the command `pip install ik_geo`. 
+
+## To use
+
+The API documentation is at [`ik_geo.pyi`](https://github.com/Verdant-Evolution/ik-geo/blob/main/ik_python/ik_geo.pyi), and there will be typechecking with mypy installed.
+For sample usage, check [here](https://github.com/Verdant-Evolution/ik-geo/tree/main/examples/python)
 
 ## To build/develop
 
@@ -18,15 +35,9 @@ Outisde of the virtual environment, you can use the following command to build a
 `source .env/bin/activate && maturin build --out dist && deactivate && pip install dist/* --force-reinstall`
 
 
-## To use
-
-The API documentation is at `ik_geo.pyi`, and there will be typechecking with mypy installed.
-
-Look at `examples/sample.py` for sample usage
-
 ## Notes
 
-The GitHub workflow for building this currently fails because the test cases don't pass
-
-This is due to imperfect 1d search in the Rust implementation that this is building off of.
-
+There is a GitHub workflow in [`../.github/workflows`](https://github.com/Verdant-Evolution/ik-geo/tree/main/.github/workflows/ik_python.yml) to automatically build this when any changes are made in this folder or to the Rust implementation  
+If the commit or pull request is tagged for release, it will also publish to PyPI, so long as the `PYPI_API_TOKEN` secret is set in the GitHub project.  
+The GitHub workflow is currently unable to build the NlOpt rust library for many a few Linux Architectures, such as ARMv7.
+Temporarily, they have been removed from the build.
