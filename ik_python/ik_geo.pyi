@@ -68,7 +68,7 @@ class Robot:
             | Annotated[List[List[float]], [3, 3]]
         ),
         t: Annotated[NDArray[np.generic], Literal[3]] | Annotated[List[float], [3]],
-    ) -> Tuple[List[float], bool]:
+    ) -> List[Tuple[List[float], bool]]:
         """
         Compute the inverse kinematics solutions for the robot.
 
@@ -76,7 +76,28 @@ class Robot:
             R: The rotation matrix to use for the inverse kinematics
             t: The position vector to use for the inverse kinematics
         Returns:
-            A tuple containing the rotation values of each joint and whether the solution is least squares
+            A list of tuples containing solutions.
+            A solution contains the rotation values of each joint and whether the solution is least squares
+        """
+
+    def get_ik_sorted(
+        self,
+        R: (
+            Annotated[NDArray[np.generic], Literal[3, 3]]
+            | Annotated[List[List[float]], [3, 3]]
+        ),
+        t: Annotated[NDArray[np.generic], Literal[3]] | Annotated[List[float], [3]],
+    ) -> List[Tuple[List[float], float, bool]]:
+        """
+        Compute the inverse kinematics solutions for the robot, as well as the error of each solution, sorted by error.
+
+        Args:
+            R: The rotation matrix to use for the inverse kinematics
+            t: The position vector to use for the inverse kinematics
+        Returns:
+            A list of tuples containing solutions.
+            A solution contains the rotation values of each joint, the error of the solution, and whether the solution is least squares
+                They are sorted by error from least to greatest
         """
 
     def forward_kinematics(
