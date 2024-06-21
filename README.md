@@ -35,11 +35,11 @@ robot.set_kinematics(kinematics)
 R = [[0, 0, 1], [0, 1, 0], [-1, 0, 0]]
 t = [-1, 3, 0]
 
-# For all possible IK solutions sorted by error
-solutions = robot.get_ik_sorted(R, t)
-
 # For a single one with 0 error, or for the best least squares solution
 solutions = robot.get_ik(R, t)
+
+# For all possible IK solutions sorted by error
+solutions = robot.get_ik_sorted(R, t)
 ```
 
 ## Performance
