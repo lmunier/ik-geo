@@ -4,7 +4,12 @@ This implementation of the core IK-Geo algorithms was adapted from [IK-Geo](http
 
 ## To install
 
-This can be installed from pypi with the command `pip install ik_geo`.
+This can be installed from pypi with:
+
+```bash
+pip install ik_geo
+```
+
 To install the package from this repository locally, use:
 
 ```bash
