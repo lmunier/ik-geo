@@ -36,3 +36,25 @@ solutions = robot.get_ik_sorted(R, t)
 # For a single one with 0 error, or for the best least squares solution
 solutions = robot.get_ik(R, t)
 ```
+
+## Performance
+
+While this implementation can be used on a wide range of manipulators, it performs much better on when the solution can be found entirely analytically. The following table shows which method is used for each type of kinematics:
+
+| Solution Type | Robot Kinematic Family                             | Example                            |
+| ------------- | -------------------------------------------------- | ---------------------------------- |
+| Closed-form   | Spherical joint                                    | Franka Production 3, fixed $q_5$   |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two intersecting axes | KUKA LBR iiwa 7 R800 , fixed $q_3$ |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two parallel axes     | ABB IRB 6640                       |
+|               | Three parallel axes                                | N/A                                |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two intersecting axes | Universal Robots UR5               |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two parallel axes     | N/A                                |
+| 1D search     | Two intersecting axes                              | Kassow Robots KR810, fixed $q_7$   |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two intersecting axes | FANUC CRX-10iA/L                   |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two parallel axes     | Kawasaki KJ125                     |
+|               | Two parallel axes                                  | N/A                                |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two parallel axes     | N/A                                |
+|               | Two intersecting axes $k, k+2$                     | ABB YuMi, fixed $q_3$              |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two intersecting axes | RRC K-1207i, fixed $q_6$           |
+|               | &nbsp;&nbsp;&nbsp;&nbsp; and two parallel axes     | N/A                                |
+| 2D search     | General 6R                                         | Kassow Robots KR810, fixed $q_6$   |
