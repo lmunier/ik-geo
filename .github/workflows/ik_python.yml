@@ -1,166 +1,154 @@
-# If anything in the ik_python or rust folders change on push, run the workflow in the ik_python folder
+# If anything in the src or test folders change on push, run the workflow
 on:
-  push:
-    branches:
-        - main
-        - master
-    paths:
-      - 'ik_python/**'
-      - 'rust/**'
-  pull_request:
-    branches:
-        - main
-        - master
-    paths:
-      - 'ik_python/**'
-      - 'rust/**'
-  workflow_dispatch:
-defaults:
-    run:
-        working-directory: ik_python
+    push:
+        branches:
+            - main
+            - master
+        paths:
+            - "src/**"
+            - "test/**"
+    pull_request:
+        branches:
+            - main
+            - master
+        paths:
+            - "src/**"
+            - "test/**"
+    workflow_dispatch:
 jobs:
     test:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-python@v5
-          with:
-            python-version: '3.10'
-        - name: Build wheels
-          uses: PyO3/maturin-action@v1
-          with:
-            target: x86_64
-            command: build
-            working-directory: ik_python
-            args: --release --out dist --find-interpreter
-            sccache: 'true'
-        - name: Test wheels
-          run: |
-            python -m pip install --upgrade pip
-            python -m pip install dist/ik_geo*.whl
-            python -m pip install numpy
-            python test/test.py 2>&1 | egrep "FAILED|ERROR" && exit 1 || exit 0
-          continue-on-error: false
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.10"
+            - name: Build wheels
+              uses: PyO3/maturin-action@v1
+              with:
+                  target: x86_64
+                  command: build
+                  args: --release --out dist --find-interpreter
+                  sccache: "true"
+            - name: Test wheels
+              run: |
+                  python -m pip install --upgrade pip
+                  python -m pip install dist/ik_geo*.whl
+                  python -m pip install numpy
+                  python test/test.py 2>&1 | egrep "FAILED|ERROR" && exit 1 || exit 0
+              continue-on-error: false
     linux:
         needs: test
         runs-on: ${{ matrix.platform.runner }}
         strategy:
-          matrix:
-            platform:
-              - runner: ubuntu-latest
-                target: x86_64
-              - runner: ubuntu-latest
-                target: x86
-              # - runner: ubuntu-latest
-              #   target: aarch64
-              # - runner: ubuntu-latest
-              #   target: armv7
-              # - runner: ubuntu-latest
-              #   target: s390x
-              # - runner: ubuntu-latest
-              #   target: ppc64le
+            matrix:
+                platform:
+                    - runner: ubuntu-latest
+                      target: x86_64
+                    - runner: ubuntu-latest
+                      target: x86
+                    # - runner: ubuntu-latest
+                    #   target: aarch64
+                    # - runner: ubuntu-latest
+                    #   target: armv7
+                    # - runner: ubuntu-latest
+                    #   target: s390x
+                    # - runner: ubuntu-latest
+                    #   target: ppc64le
         steps:
-          - uses: actions/checkout@v4
-          - uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
-          - name: Build wheels
-            uses: PyO3/maturin-action@v1
-            with:
-              target: ${{ matrix.platform.target }}
-              args: --release --out dist --find-interpreter
-              sccache: 'true'
-              manylinux: auto
-              working-directory: ik_python
-          - name: Upload wheels
-            uses: actions/upload-artifact@v4
-            with:
-              name: wheels-linux-${{ matrix.platform.target }}
-              path: ik_python/dist
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.10"
+            - name: Build wheels
+              uses: PyO3/maturin-action@v1
+              with:
+                  target: ${{ matrix.platform.target }}
+                  args: --release --out dist --find-interpreter
+                  sccache: "true"
+                  manylinux: auto
+            - name: Upload wheels
+              uses: actions/upload-artifact@v4
+              with:
+                  name: wheels-linux-${{ matrix.platform.target }}
     windows:
         needs: test
         runs-on: ${{ matrix.platform.runner }}
         strategy:
-          matrix:
-            platform:
-              - runner: windows-latest
-                target: x64
-              - runner: windows-latest
-                target: x86
+            matrix:
+                platform:
+                    - runner: windows-latest
+                      target: x64
+                    - runner: windows-latest
+                      target: x86
         steps:
-          - uses: actions/checkout@v4
-          - uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
-              architecture: ${{ matrix.platform.target }}
-          - name: Build wheels
-            uses: PyO3/maturin-action@v1
-            with:
-              target: ${{ matrix.platform.target }}
-              args: --release --out dist --find-interpreter
-              sccache: 'true'
-              working-directory: ik_python
-          - name: Upload wheels
-            uses: actions/upload-artifact@v4
-            with:
-              name: wheels-windows-${{ matrix.platform.target }}
-              path: ik_python/dist
-    
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.10"
+                  architecture: ${{ matrix.platform.target }}
+            - name: Build wheels
+              uses: PyO3/maturin-action@v1
+              with:
+                  target: ${{ matrix.platform.target }}
+                  args: --release --out dist --find-interpreter
+                  sccache: "true"
+            - name: Upload wheels
+              uses: actions/upload-artifact@v4
+              with:
+                  name: wheels-windows-${{ matrix.platform.target }}
+
     macos:
         needs: test
         runs-on: ${{ matrix.platform.runner }}
         strategy:
-          matrix:
-            platform:
-              - runner: macos-latest
-                target: x86_64
-              - runner: macos-14
-                target: aarch64
+            matrix:
+                platform:
+                    - runner: macos-latest
+                      target: x86_64
+                    - runner: macos-14
+                      target: aarch64
         steps:
-          - uses: actions/checkout@v4
-          - uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
-          - name: Build wheels
-            uses: PyO3/maturin-action@v1
-            with:
-              target: ${{ matrix.platform.target }}
-              args: --release --out dist --find-interpreter
-              sccache: 'true'
-              working-directory: ik_python
-          - name: Upload wheels
-            uses: actions/upload-artifact@v4
-            with:
-              name: wheels-macos-${{ matrix.platform.target }}
-              path: ik_python/dist
-    
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.10"
+            - name: Build wheels
+              uses: PyO3/maturin-action@v1
+              with:
+                  target: ${{ matrix.platform.target }}
+                  args: --release --out dist --find-interpreter
+                  sccache: "true"
+            - name: Upload wheels
+              uses: actions/upload-artifact@v4
+              with:
+                  name: wheels-macos-${{ matrix.platform.target }}
+
     sdist:
         needs: test
         runs-on: ubuntu-latest
         steps:
-          - uses: actions/checkout@v4
-          - name: Build sdist
-            uses: PyO3/maturin-action@v1
-            with:
-              command: sdist
-              args: --out dist
-              working-directory: ik_python
-          - name: Upload sdist
-            uses: actions/upload-artifact@v4
-            with:
-              name: wheels-sdist
-              path: ik_python/dist
+            - uses: actions/checkout@v4
+            - name: Build sdist
+              uses: PyO3/maturin-action@v1
+              with:
+                  command: sdist
+                  args: --out dist
+            - name: Upload sdist
+              uses: actions/upload-artifact@v4
+              with:
+                  name: wheels-sdist
     release:
         name: Release
         runs-on: ubuntu-latest
         # if: startsWith(github.ref, 'refs/tags/')
         needs: [linux, windows, macos, sdist]
         steps:
-          - uses: actions/download-artifact@v4
-          - name: Publish to PyPI
-            uses: PyO3/maturin-action@v1
-            env:
-              MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-            with:
-              command: upload
-              args: --non-interactive --skip-existing wheels-*/*
+            - uses: actions/download-artifact@v4
+            - name: Publish to PyPI
+              uses: PyO3/maturin-action@v1
+              env:
+                  MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+              with:
+                  command: upload
+                  args: --non-interactive --skip-existing wheels-*/*

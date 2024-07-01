@@ -1,40 +1,73 @@
-# Windows default autosave extension
-*.asv
+/target
 
-# OSX / *nix default autosave extension
-*.m~
+# Byte-compiled / optimized / DLL files
+__pycache__/
+.pytest_cache/
+*.py[cod]
 
-# Compiled MEX binaries (all platforms)
-*.mex*
+# C extensions
+*.so
 
-# Packaged app and toolbox files
-*.mlappinstall
-*.mltbx
+# Distribution / packaging
+.Python
+.venv/
+env/
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64
+parts/
+sdist/
+var/
+include/
+man/
+venv/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Generated helpsearch folders
-helpsearch*/
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+pip-selfcheck.json
 
-# Simulink code generation folders
-slprj/
-sccprj/
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
 
-# Matlab code generation folders
-codegen/
+# Translations
+*.mo
 
-# Simulink autosave extension
-*.autosave
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
 
-# Simulink cache files
-*.slxc
+# Rope
+.ropeproject
 
-# Octave session info
-octave-workspace
+# Django stuff:
+*.log
+*.pot
 
-# CSV test files
-*.csv
+.DS_Store
 
-# All binary files
-*.out
+# Sphinx documentation
+docs/_build/
 
-.mypy_cache/
-.vscode
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Pyenv
+.python-version
+.env/
