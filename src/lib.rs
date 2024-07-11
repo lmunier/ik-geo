@@ -47,7 +47,7 @@ fn pack_kinematics(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> (Matrix3x6<f64>, Matri
 }
 
 // Create a class for the robot
-#[pyclass()]
+#[pyclass]
 struct Robot {
     robot: IKGeoRobot,
 }
@@ -56,6 +56,13 @@ struct Robot {
 // Implement the Robot class
 #[pymethods]
 impl Robot {
+    // No constructor, raise not implemented error
+    #[new]
+    fn new() -> PyResult<Self> {
+        Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
+            "No constructor for Robot class, use static factory methods instead",
+        ))
+    }
     // Get the inverse kinematics for the robot
     // 2d array for the rotation matrix (row major), 3 values for translation vector
     pub fn get_ik(
@@ -216,35 +223,6 @@ impl Robot {
         })
     }
 }
-
-// fn dummy_solver_hardcoded(_: &Matrix3<f64>, _: &Vector3<f64>) -> (Vec<Vector6<f64>>, Vec<bool>) {
-//     panic!("This function should never be called");
-// }
-
-// fn dummy_solver_general(
-//     _: &Matrix3<f64>,
-//     _: &Vector3<f64>,
-//     _: &Kinematics<6, 7>,
-// ) -> (Vec<Vector6<f64>>, Vec<bool>) {
-//     panic!("This function should never be called");
-// }
-
-// // Unexposed method to call the correct ik solver
-// fn call_ik_solver(
-//     robot: &mut Robot,
-//     rot_matrix: Matrix3<f64>,
-//     trans_vec: Vector3<f64>,
-// ) -> (Vec<Vector6<f64>>, Vec<bool>) {
-//     if robot.is_hardcoded {
-//         (robot.hardcoded_solver)(&rot_matrix, &trans_vec)
-//     } else {
-//         // Make sure kinematics are set before calling the general solver
-//         if !robot.kin_set {
-//             panic!("Kinematics must be set before calling the general solver");
-//         }
-//         (robot.general_solver)(&rot_matrix, &trans_vec, &robot.kin)
-//     }
-// }
 
 /// A Python module implemented in Rust.
 #[pymodule]

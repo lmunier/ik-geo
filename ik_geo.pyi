@@ -2,11 +2,20 @@ from typing import List, Tuple, Annotated, Literal
 import numpy as np
 from numpy.typing import NDArray
 
+
 class Robot:
     """
-    Representation of the robot for inverse kinematics
+    Representation of the robot for inverse kinematics.
 
+    Must construct with factory methods, default constructor raises NotImplementedError.
     """
+    def __init__(self) -> None:
+        """
+        Invalid constructor, will raise a NotImplementedError
+
+        Use the factory methods instead.
+        """
+        raise NotImplementedError("Initialize with factory methods")
 
     def get_ik(
         self,
@@ -96,7 +105,7 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
+        pass
 
     @classmethod
     def spherical_two_parallel(
@@ -110,7 +119,7 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
+        pass
 
     @classmethod
     def spherical(
@@ -124,7 +133,7 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
+        pass
 
     @classmethod
     def three_parallel_two_intersecting(
@@ -138,7 +147,7 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
+        pass
 
     @classmethod
     def three_parallel(
@@ -152,7 +161,7 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
+        pass
 
     @classmethod
     def two_parallel(
@@ -166,7 +175,7 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
+        pass
 
     @classmethod
     def two_intersecting(
@@ -180,7 +189,7 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
+        pass
 
     @classmethod
     def gen_six_dof(
@@ -194,5 +203,4 @@ class Robot:
             | Annotated[List[List[float]], [7, 3]]
         ),
     ) -> "Robot":
-        ...
-
+        pass
