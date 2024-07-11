@@ -1,0 +1,18 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "ik_geo"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+license = {file = "LICENSE"}
+description = "Analytic IK solver for 6 and 7 axes robot arms. Algorithm adapted from IK-Geo (https://arxiv.org/pdf/2211.05737)"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
