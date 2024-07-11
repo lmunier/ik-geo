@@ -70,6 +70,7 @@ jobs:
             - name: Upload wheels
               uses: actions/upload-artifact@v4
               with:
+                  path: dist
                   name: wheels-linux-${{ matrix.platform.target }}
     windows:
         needs: test
@@ -96,6 +97,7 @@ jobs:
             - name: Upload wheels
               uses: actions/upload-artifact@v4
               with:
+                  path: dist
                   name: wheels-windows-${{ matrix.platform.target }}
 
     macos:
@@ -122,6 +124,7 @@ jobs:
             - name: Upload wheels
               uses: actions/upload-artifact@v4
               with:
+                  path: dist
                   name: wheels-macos-${{ matrix.platform.target }}
 
     sdist:
@@ -137,6 +140,7 @@ jobs:
             - name: Upload sdist
               uses: actions/upload-artifact@v4
               with:
+                  path: dist
                   name: wheels-sdist
     release:
         name: Release

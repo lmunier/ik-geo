@@ -47,8 +47,7 @@ hardcodedFilenames = [
     "ur5"
 ]
 
-
-epsilon = 1e-2
+epsilon = 1e-3
 
 
 # Test the general robots
