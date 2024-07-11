@@ -20,9 +20,9 @@ pip install .
 ## To Use
 
 Refer to `examples/python/sample.py` for a full code example.
-To compute the IK solutions for a specific robot, you can either select one of the hardcoded robots available or provide your own kinematics. If you provide your own kinematics, you must do so as a [Product of Exponentials (POE)](https://en.wikipedia.org/wiki/Product_of_exponentials_formula). This is either with 6 or 7 `h` vectors (rotation axes) and 7 or 8 p vectors (displacements), respectively.
+To compute the IK solutions for a specific robot, you can either select one of the hardcoded robots available or provide your own kinematics. If you provide your own kinematics, you must do so as a [Product of Exponentials (POE)](https://en.wikipedia.org/wiki/Product_of_exponentials_formula). This is either with 6 or 7 `h` vectors (rotation axes) and 7 or 8 `p` vectors (displacements), respectively. Note that 7-joint bots are not yet supported, so the user must choose one joint to fix to give 6 `h` vectors and 7 `p` vectors
 
-Once you have your kinematics, you need to choose the correct decomposition strategy from: { "SphericalTwoParallel", "SphericalTwoIntersecting", "Spherical", "ThreeParallelTwoIntersecting", "ThreeParallel", "TwoParallel", "TwoIntersecting" } to use. If you choose the wrong one, you will get wrong answers.
+Once you have your kinematics, you need to choose the correct decomposition strategy from: { "spherical_two_parallel", "spherical_two_intersecting", "spherical", "three_parallel_two_intersecting", "three_parallel", "two_parallel", "two_intersecting", "gen_six_dof" } to use. If you choose the wrong one, you will get wrong answers.
 
 Once you have configured your IK solver, you can get a list of IK solutions by calling the desired ik function:
 
