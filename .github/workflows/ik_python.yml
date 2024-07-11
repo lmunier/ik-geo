@@ -4,16 +4,10 @@ on:
         branches:
             - main
             - master
-        paths:
-            - "src/**"
-            - "test/**"
     pull_request:
         branches:
             - main
             - master
-        paths:
-            - "src/**"
-            - "test/**"
     workflow_dispatch:
 jobs:
     test:
