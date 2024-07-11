@@ -1,23 +1,14 @@
-use pyo3::exceptions::PyValueError;
+use ::ik_geo::inverse_kinematics::auxiliary::Matrix3x7;
 use pyo3::prelude::*;
 
-// use ::ik_geo::inverse_kinematics::auxiliary::Kinematics;
-// use ::ik_geo::inverse_kinematics::hardcoded::*;
-// use ::ik_geo::inverse_kinematics::{
-//     gen_six_dof, spherical, spherical_two_intersecting, spherical_two_parallel, three_parallel,
-//     three_parallel_two_intersecting, two_intersecting, two_parallel,
-// };
+use ::ik_geo::nalgebra::{Matrix3, Matrix3x6, Vector3};
 
-// use ik_geo::inverse_kinematics::setups::calculate_ik_error;
-
-use ik_geo::nalgebra::{Matrix3, Vector3, Vector6};
-
-use ik_geo::robot::IKSolver;
-use ik_geo::robot::Robot as IKGeoRobot;
-use ik_geo::robot::{irb6640, spherical_bot, three_parallel_bot, two_parallel_bot, ur5};
+use ::ik_geo::robot::IKSolver;
+use ::ik_geo::robot::Robot as IKGeoRobot;
+use ::ik_geo::robot;
 
 fn pack(rotation: [[f64; 3]; 3], translation: [f64; 3]) -> (Matrix3<f64>, Vector3<f64>) {
-    let mut new_matrix = Matrix3::zeros();
+    let mut new_matrix: Matrix3<f64> = Matrix3::zeros();
     for i in 0..3 {
         for j in 0..3 {
             new_matrix[(i, j)] = rotation[j][i];
@@ -39,11 +30,28 @@ fn unpack(rotation: Matrix3<f64>, translation: Vector3<f64>) -> ([[f64; 3]; 3], 
     )
 }
 
+fn pack_kinematics(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> (Matrix3x6<f64>, Matrix3x7<f64>) {
+    let mut new_h = Matrix3x6::zeros();
+    let mut new_p = Matrix3x7::zeros();
+    for i in 0..3 {
+        for j in 0..6 {
+            new_h[(i, j)] = h[j][i];
+        }
+    }
+    for i in 0..3 {
+        for j in 0..7 {
+            new_p[(i, j)] = p[j][i];
+        }
+    }
+    (new_h, new_p)
+}
+
 // Create a class for the robot
 #[pyclass()]
 struct Robot {
     robot: IKGeoRobot,
 }
+
 
 // Implement the Robot class
 #[pymethods]
@@ -96,7 +104,7 @@ impl Robot {
     // Factory methods for each robot type
     #[staticmethod]
     fn irb6640() -> PyResult<Self> {
-        Ok(Robot { robot: irb6640() })
+        Ok(Robot { robot: robot::irb6640() })
     }
 
     // #[staticmethod]
@@ -106,20 +114,20 @@ impl Robot {
 
     #[staticmethod]
     fn ur5() -> PyResult<Self> {
-        Ok(Robot { robot: ur5() })
+        Ok(Robot { robot: robot::ur5() })
     }
 
     #[staticmethod]
     fn three_parallel_bot() -> PyResult<Self> {
         Ok(Robot {
-            robot: three_parallel_bot(),
+            robot: robot::three_parallel_bot(),
         })
     }
 
     #[staticmethod]
     fn two_parallel_bot() -> PyResult<Self> {
         Ok(Robot {
-            robot: two_parallel_bot(),
+            robot: robot::two_parallel_bot(),
         })
     }
 
@@ -131,7 +139,7 @@ impl Robot {
     #[staticmethod]
     fn spherical_bot() -> PyResult<Self> {
         Ok(Robot {
-            robot: spherical_bot(),
+            robot: robot::spherical_bot(),
         })
     }
 
@@ -140,44 +148,72 @@ impl Robot {
     //     Self::new("yumifixedq3")
     // }
 
+    
+
     #[staticmethod]
-    fn spherical_two_parallel() -> PyResult<Self> {
-        // TODO: Get kinematics and handle these.
+    fn spherical_two_parallel(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::spherical_two_parallel(new_h, new_p),
+        })
+    }
+    
+
+    #[staticmethod]
+    fn spherical_two_intersecting(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::spherical_two_intersecting(new_h, new_p),
+        })
     }
 
     #[staticmethod]
-    fn spherical_two_intersecting() -> PyResult<Self> {
-        Self::new("sphericaltwointersecting")
+    fn spherical(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::spherical(new_h, new_p),
+        })
     }
 
     #[staticmethod]
-    fn spherical() -> PyResult<Self> {
-        Self::new("spherical")
+    fn three_parallel_two_intersecting(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::three_parallel_two_intersecting(new_h, new_p),
+        })
+    }
+
+
+    #[staticmethod]
+    fn three_parallel(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::three_parallel(new_h, new_p),
+        })
     }
 
     #[staticmethod]
-    fn three_parallel_two_intersecting() -> PyResult<Self> {
-        Self::new("threeparalleltwointersecting")
+    fn two_parallel(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::two_parallel(new_h, new_p),
+        })
     }
 
     #[staticmethod]
-    fn three_parallel() -> PyResult<Self> {
-        Self::new("threeparallel")
+    fn two_intersecting(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::two_intersecting(new_h, new_p),
+        })
     }
 
     #[staticmethod]
-    fn two_parallel() -> PyResult<Self> {
-        Self::new("twoparallel")
-    }
-
-    #[staticmethod]
-    fn two_intersecting() -> PyResult<Self> {
-        Self::new("twointersecting")
-    }
-
-    #[staticmethod]
-    fn gen_six_dof() -> PyResult<Self> {
-        Self::new("gensixdof")
+    fn gen_six_dof(h: [[f64; 3]; 6], p: [[f64; 3]; 7]) -> PyResult<Self> {
+        let (new_h, new_p) = pack_kinematics(h, p);
+        Ok(Robot {
+            robot: robot::gen_six_dof(new_h, new_p),
+        })
     }
 }
 
@@ -210,49 +246,9 @@ impl Robot {
 //     }
 // }
 
-// // Kinematics wrapper class
-// #[pyclass]
-// #[derive(Clone)]
-// struct KinematicsObject {
-//     pub kin: Kinematics<6, 7>,
-// }
-
-// // Implement the Kinematics wrapper class
-// #[pymethods]
-// impl KinematicsObject {
-//     const H_ROWS: usize = 3;
-//     const P_ROWS: usize = 3;
-//     const H_COLS: usize = 6;
-//     const P_COLS: usize = 7;
-
-//     // Create a new Kinematics object from
-//     // h_vals: array of vals in the h matrix, column major
-//     // p_vals: array of vals in the p matrix, column major
-//     // Basically, both are of format [[1,0,0], [0,1,0]...] where these are the vectors
-//     #[new]
-//     fn new(
-//         h_vals: [[f64; Self::H_ROWS]; Self::H_COLS],
-//         p_vals: [[f64; Self::P_ROWS]; Self::P_COLS],
-//     ) -> Self {
-//         let mut kin = Kinematics::<6, 7>::new();
-//         for i in 0..Self::H_ROWS {
-//             for j in 0..Self::H_COLS {
-//                 kin.h[(i, j)] = h_vals[j][i];
-//             }
-//         }
-//         for i in 0..Self::P_ROWS {
-//             for j in 0..Self::P_COLS {
-//                 kin.p[(i, j)] = p_vals[j][i];
-//             }
-//         }
-//         KinematicsObject { kin }
-//     }
-// }
-
-// /// A Python module implemented in Rust.
-// #[pymodule]
-// fn ik_geo(_py: Python, m: &PyModule) -> PyResult<()> {
-//     m.add_class::<Robot>()?;
-//     m.add_class::<KinematicsObject>()?;
-//     Ok(())
-// }
+/// A Python module implemented in Rust.
+#[pymodule]
+fn ik_geo(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_class::<Robot>()?;
+    Ok(())
+}

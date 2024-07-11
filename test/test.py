@@ -11,31 +11,11 @@
 # Requires numpy to be installed
 
 # Import the test case csv files
-generalFilenames = [
-    "IK_2_intersecting",
-    "IK_2_parallel",
-    "IK_3_parallel_2_intersecting",
-    "IK_3_parallel",
-    "IK_spherical",
-    "IK_spherical_2_parallel",
-    "IK_spherical_2_intersecting",
-    "IK_gen_6_dof",
-]
-hardcodedFilenames = [
-    "IRB_6640",
-    "KUKA_R800_fixed_q3",
-    "RRC_fixed_q6",
-    "spherical_bot",
-    "three_parallel_bot",
-    "two_parallel_bot",
-    "ur5",
-    "yumi_fixed_q3",
-]
 
 from collections import namedtuple
 import numpy as np
 import unittest
-import ik_geo
+from ik_geo import Robot
 from math import pi
 
 # Import the csv files
@@ -48,6 +28,26 @@ TestCaseHardCoded = namedtuple(
     "TestCaseHardCoded", ["rotationMatrix", "positionVector"]
 )
 
+
+generalFilenames = [
+    "IK_2_intersecting",
+    "IK_2_parallel",
+    "IK_3_parallel_2_intersecting",
+    "IK_3_parallel",
+    "IK_spherical",
+    "IK_spherical_2_parallel",
+    "IK_spherical_2_intersecting",
+    "IK_gen_6_dof",
+]
+hardcodedFilenames = [
+    "IRB_6640",
+    "spherical_bot",
+    "three_parallel_bot",
+    "two_parallel_bot",
+    "ur5"
+]
+
+
 epsilon = 1e-2
 
 
@@ -58,8 +58,7 @@ class TestGeneralRobots(unittest.TestCase):
         for configNum, testCase in enumerate(bot.testcases):
             hMatrix = np.reshape(testCase.hVals, (6, 3))
             pMatrix = np.reshape(testCase.pVals, (7, 3))
-            kinematics = ik_geo.KinematicsObject(hMatrix, pMatrix)
-            bot.robot.set_kinematics(kinematics)
+            robot = bot.robot(hMatrix, pMatrix)
 
             # Generate 20 random robot configurations
             qVals = np.random.rand(20, 6) * 2 * pi - pi
@@ -68,12 +67,12 @@ class TestGeneralRobots(unittest.TestCase):
                 qVals = np.random.rand(5, 6) * 2 * pi - pi
             for i, q in enumerate(qVals):
                 # Get the forward kinematics result and then run inverse to see if we get the same thing
-                forward_kinematics = bot.robot.forward_kinematics(q)
+                forward_kinematics = robot.forward_kinematics(q)
                 rotation = np.array(forward_kinematics[0])
                 translation = np.array(forward_kinematics[1])
 
                 # Get the inverse kinematics
-                results = bot.robot.get_ik_sorted(
+                results = robot.get_ik_sorted(
                     forward_kinematics[0], forward_kinematics[1]
                 )
 
@@ -87,7 +86,7 @@ class TestGeneralRobots(unittest.TestCase):
                 result = results[0]
 
                 # Run forward kinematics on the result to make sure it is the same as the input
-                resultForward = bot.robot.forward_kinematics(result[0])
+                resultForward = robot.forward_kinematics(result[0])
                 resultRotation = np.array(resultForward[0])
                 resultTranslation = np.array(resultForward[1])
 
@@ -118,20 +117,20 @@ class TestGeneralRobots(unittest.TestCase):
 
 def add_general_test(filename):
     # Setup the robot from the filename
-    robot = ik_geo.Robot(
+    robot_name = (
         filename.replace("IK_", "")
-        .replace("_", "")
         .replace("2", "two")
         .replace("3", "three")
         .replace("6", "six")
     )
 
+    # Switch on robot name
+    robot_instantiater = getattr(Robot, robot_name)
+
     testcases = []
     # Open ../../test_cases/FILENAME.csv
     with open(
-        os.path.join(
-            os.path.dirname(__file__), "..", "..", "test_cases", filename + ".csv"
-        )
+        os.path.join(os.path.dirname(__file__), "..", "test_cases", filename + ".csv")
     ) as f:
         reader = csv.reader(f)
         # Skip the header
@@ -143,7 +142,7 @@ def add_general_test(filename):
             hVals = [float(x) for x in row[0:18]]
             pVals = [float(x) for x in row[18:39]]
             testcases.append(TestCaseGeneral(hVals, pVals))
-    bot = TestBot(filename, robot, testcases)
+    bot = TestBot(filename, robot_instantiater, testcases)
     setattr(
         TestGeneralRobots,
         "test_" + filename,
@@ -170,14 +169,12 @@ class TestHardcodedBots(unittest.TestCase):
 
 def add_hardcoded_test(filename):
     # Setup the robot from the filename
-    robot = ik_geo.Robot(filename)
+    robot = getattr(Robot, filename.replace("IRB_6640", "irb6640"))()
 
     testcases = []
     # Open ../../test_cases/FILENAME.csv
     with open(
-        os.path.join(
-            os.path.dirname(__file__), "..", "..", "test_cases", filename + ".csv"
-        )
+        os.path.join(os.path.dirname(__file__), "..", "test_cases", filename + ".csv")
     ) as f:
         reader = csv.reader(f)
         # Skip the header

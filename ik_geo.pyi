@@ -2,64 +2,11 @@ from typing import List, Tuple, Annotated, Literal
 import numpy as np
 from numpy.typing import NDArray
 
-class KinematicsObject:
-    """
-    Representation of the kinematics for the robot
-
-    Args:
-        h_matrix: The h matrix to use (array of vectors of rotation axes)
-        p_matrix: The p matrix to use (array of vectors of displacements between joints)
-    """
-
-    def __init__(
-        self,
-        h_matrix: (
-            Annotated[NDArray[np.generic], Literal[6, 3]]
-            | Annotated[List[List[float]], [6, 3]]
-        ),
-        p_matrix: (
-            Annotated[NDArray[np.generic], Literal[7, 3]]
-            | Annotated[List[List[float]], [7, 3]]
-        ),
-    ) -> None: ...
-
-RobotType = (
-    Literal["Irb6640"]
-    | Literal["KukaR800FixedQ3"]
-    | Literal["Ur5"]
-    | Literal["ThreeParallelBot"]
-    | Literal["TwoParallelBot"]
-    | Literal["RrcFixedQ6"]
-    | Literal["SphericalBot"]
-    | Literal["YumiFixedQ3"]
-    | Literal["SphericalTwoParallel"]
-    | Literal["SphericalTwoIntersecting"]
-    | Literal["Spherical"]
-    | Literal["ThreeParallelTwoIntersecting"]
-    | Literal["ThreeParallel"]
-    | Literal["TwoParallel"]
-    | Literal["TwoIntersecting"]
-    | Literal["GenSixDof"]
-)
-
 class Robot:
     """
     Representation of the robot for inverse kinematics
 
-    Args:
-        robot_type: The type of robot to create, either a specific hardcoded bot or a general type of bot
     """
-
-    def __init__(self, robot_type: RobotType) -> None: ...
-    @classmethod
-    def set_kinematics(cls, kinematics: KinematicsObject) -> None:
-        """
-        Set the kinematics object for the robot
-
-
-        Args:
-            kinematics: The kinematic description of the robot
-        """
 
     def get_ik(
         self,
@@ -114,65 +61,138 @@ class Robot:
         """
 
     @classmethod
-    def irb6640(cls) -> "Robot":
-        return cls("Irb6640")
+    def irb6640(cls) -> "Robot": ...
+
+    # @classmethod
+    # def kuka_r800_fixed_q3(cls) -> "Robot":
+    #     ...
 
     @classmethod
-    def kuka_r800_fixed_q3(cls) -> "Robot":
-        return cls("KukaR800FixedQ3")
+    def ur5(cls) -> "Robot": ...
+    @classmethod
+    def three_parallel_bot(cls) -> "Robot": ...
+    @classmethod
+    def two_parallel_bot(cls) -> "Robot": ...
+    @classmethod
+    def spherical_bot(cls) -> "Robot": ...
+
+    # @classmethod
+    # def rrc_fixed_q6(cls) -> "Robot":
+    #     return cls("RrcFixedQ6")
+
+    # @classmethod
+    # def yumi_fixed_q3(cls) -> "Robot":
+    #     return cls("YumiFixedQ3")
 
     @classmethod
-    def ur5(cls) -> "Robot":
-        return cls("Ur5")
+    def spherical_two_intersecting(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
     @classmethod
-    def three_parallel_bot(cls) -> "Robot":
-        return cls("ThreeParallelBot")
+    def spherical_two_parallel(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
     @classmethod
-    def two_parallel_bot(cls) -> "Robot":
-        return cls("TwoParallelBot")
+    def spherical(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
     @classmethod
-    def rrc_fixed_q6(cls) -> "Robot":
-        return cls("RrcFixedQ6")
+    def three_parallel_two_intersecting(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
     @classmethod
-    def spherical_two_intersecting(cls) -> "Robot":
-        return cls("SphericalTwoIntersecting")
+    def three_parallel(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
     @classmethod
-    def spherical_two_parallel(cls) -> "Robot":
-        return cls("SphericalTwoParallel")
+    def two_parallel(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
     @classmethod
-    def spherical(cls) -> "Robot":
-        return cls("Spherical")
+    def two_intersecting(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
     @classmethod
-    def three_parallel_two_intersecting(cls) -> "Robot":
-        return cls("ThreeParallelTwoIntersecting")
+    def gen_six_dof(
+        cls,
+        h: (
+            Annotated[NDArray[np.generic], Literal[6, 3]]
+            | Annotated[List[List[float]], [6, 3]]
+        ),
+        p: (
+            Annotated[NDArray[np.generic], Literal[7, 3]]
+            | Annotated[List[List[float]], [7, 3]]
+        ),
+    ) -> "Robot":
+        ...
 
-    @classmethod
-    def three_parallel(cls) -> "Robot":
-        return cls("ThreeParallel")
-
-    @classmethod
-    def two_parallel(cls) -> "Robot":
-        return cls("TwoParallel")
-
-    @classmethod
-    def two_intersecting(cls) -> "Robot":
-        return cls("TwoIntersecting")
-
-    @classmethod
-    def gen_six_dof(cls) -> "Robot":
-        return cls("GenSixDof")
-
-    @classmethod
-    def spherical_bot(cls) -> "Robot":
-        return cls("SphericalBot")
-
-    @classmethod
-    def yumi_fixed_q3(cls) -> "Robot":
-        return cls("YumiFixedQ3")

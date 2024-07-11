@@ -27,11 +27,13 @@ Once you have your kinematics, you need to choose the correct decomposition stra
 Once you have configured your IK solver, you can get a list of IK solutions by calling the desired ik function:
 
 ```python
+from ik_geo import Robot
 
-kinematics = ik_geo.KinematicsObject(H, P)
+h # 6x3 array
+p # 7x3 array
 
-robot = ik_geo.Robot("SphericalTwoIntersecting")
-robot.set_kinematics(kinematics)
+robot = Robot.spherical_two_intersecting(h,p)
+
 R = [[0, 0, 1], [0, 1, 0], [-1, 0, 0]]
 t = [-1, 3, 0]
 
