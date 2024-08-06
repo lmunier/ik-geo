@@ -10,4 +10,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = "0.20.0"
-ik-geo = "0.1.2"
+ik-geo = { path = "../ik-geo-rust" }

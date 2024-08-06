@@ -68,8 +68,6 @@ checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 [[package]]
 name = "ik-geo"
 version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd228b435f0faa48cb27933024ff0fe5b40f4718bacaf9152cc273e4a9d972c4"
 dependencies = [
  "fastrand",
  "nalgebra",
