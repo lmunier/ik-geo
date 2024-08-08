@@ -50,28 +50,25 @@ def run_ik_general(pos: list, quat: list):
     # Create the kinematics
     # Paremeters are deconstructed h matrix and p matrix
     # I'm using the code from the Irb6640 to for real kinematics
-    mey = [0.0, -1.0, 0.0]
-    ez = [0.0, 0.0, 1.0]
-    mez = [0.0, 0.0, -1.0]
     hMat = np.array(
         [
             [0., 0., 1.],
-            [0., 0., 1.],
-            [0., 1., 0.],
-            [0., 1., 0.],
-            [0., 1., 0.],
-            [0., 0., -1.]
+            [0., -1., 0.],
+            [0., -1., 0.],
+            [0., -1., 0.],
+            [0., 0., -1.],
+            [0., -1., 0.]
         ]
     )
     pMat = np.array(
         [
             [0., 0., 0.],
             [0., 0., 0.0892],
-            [-0.1358, 0., 0.],
-            [0.425, -0.1197, -0.],
-            [0.3922, 0., 0.],
-            [0., 0.093, 0.],
-            [0., 0., -0.0823]
+            [-0.425, 0., 0.],
+            [-0.3922, 0., 0.],
+            [0., -0.1091, 0.],
+            [0., 0., -0.0946],
+            [0., -0.0823, 0.]
         ]
     )
 
@@ -84,15 +81,15 @@ def run_ik_general(pos: list, quat: list):
     rotation_mat = quaternion_to_rotation_matrix(quat)
     translation_mat = pos_quat_to_transformation_matrix(pos)
 
-    solutions = robot.get_ik(
+    solutions = robot.get_ik_sorted(
         rotation_mat, translation_mat
     )
 
-    for (q, ls) in solutions:
-        # print(
-        #     "Solution: (" +
-        #     ((f"Least Squares, error={error}") if ls else "Exact") + ")"
-        # )
+    for (q, error, ls) in solutions:
+        print(
+            "Solution: (" +
+            ((f"Least Squares, error={error}") if ls else "Exact") + ")"
+        )
         for qVal in q:
             print(qVal)
 
@@ -157,6 +154,48 @@ def quaternion_to_rotation_matrix(quat: list) -> np.ndarray:
         [r10, r11, r12],
         [r20, r21, r22]
     ])
+
+
+def quaternion_conjugate(q):
+    """Compute the conjugate of a quaternion in the format [x, y, z, w]."""
+    return np.array([-q[0], -q[1], -q[2], q[3]])
+
+
+def quaternion_multiply(q1, q2):
+    """Compute the product of two quaternions in the format [x, y, z, w]."""
+    x1, y1, z1, w1 = q1
+    x2, y2, z2, w2 = q2
+
+    return np.array([
+        w1*x2 + x1*w2 + y1*z2 - z1*y2,
+        w1*y2 - x1*z2 + y1*w2 + z1*x2,
+        w1*z2 + x1*y2 - y1*x2 + z1*w2,
+        w1*w2 - x1*x2 - y1*y2 - z1*z2
+    ])
+
+
+def quaternion_error(q1, q2):
+    """Compute the error angle between two quaternions in the format [x, y, z, w]."""
+    # Normalize the quaternions
+    q1 = q1 / np.linalg.norm(q1)
+    q2 = q2 / np.linalg.norm(q2)
+
+    # Compute the inverse of q2 (which is its conjugate for unit quaternions)
+    q2_inv = quaternion_conjugate(q2)
+
+    # Compute the quaternion product q1 * q2^(-1)
+    q_prod = quaternion_multiply(q1, q2_inv)
+
+    # Extract the vector part of the quaternion product
+    vector_part = q_prod[:3]
+
+    # Compute the norm of the vector part
+    vector_norm = np.linalg.norm(vector_part)
+
+    # Compute the angle theta
+    theta = 2 * np.arcsin(vector_norm)
+
+    return theta
 
 
 def rotation_matrix_to_quaternion(R: np.ndarray) -> list:
@@ -226,7 +265,7 @@ def compare_results(robot: Robot, q: list, pos: list, quat: list):
     new_pos = np.array(forward[1])
     new_quat = np.array(rotation_matrix_to_quaternion(forward[0]))
 
-    error_quat = np.linalg.norm(new_quat - quat)
+    error_quat = quaternion_error(new_quat, quat)
     error_pos = np.linalg.norm(new_pos - pos)
 
     print(f"New forward position: {forward[1]}")
