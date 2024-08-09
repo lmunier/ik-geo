@@ -1,8 +1,28 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+from scripts.help_maths import get_transformation as get_tf
+from libhupf import iksolver
+from scipy.spatial.transform import Rotation as R
 from ik_geo import Robot
+import numpy as np
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+a_list = [0, -0.425, -0.39225, 0.0, 0, 0.0]
+d_list = [0.089159, 0.0, 0.0, 0.10915, 0.09465, 0.0]
+alpha_list = [np.pi / 2, 0.0, 0.0, np.pi / 2, -np.pi / 2, 0.0]
+offset_theta_list = [0, 0, 0, 0, 0, 0]
+rots_list = [1, 1, 1, 1, 1, 1]
+
+# initializing the robot as iksolver class
+ur5 = iksolver(a_list, d_list, offset_theta_list, alpha_list, rots_list)
 
 # Sample assumes you have numpy installed globally
-import numpy as np
 # from trac_ik_python.trac_ik import IK
+
+ROBOT = None
 
 
 def run_ik_hardcoded(pos: list, quat: list):
@@ -15,14 +35,15 @@ def run_ik_hardcoded(pos: list, quat: list):
     print("\nRunning hardcoded inverse kinematics:\n-----------------------------")
     # Create the robot, type ur5
     # This can be done with string literals as well as factory methods (shown below)
-    robot = Robot.ur5()
+    global ROBOT
+    ROBOT = Robot.ur5()
     # Get the inverse kinematics
     # The first argument is the rotation matrix (3x3, row major)
     # The second argument is the position vector (3x1)
     rotation_mat = quaternion_to_rotation_matrix(quat)
     translation_mat = pos_quat_to_transformation_matrix(pos)
 
-    solutions = robot.get_ik_sorted(
+    solutions = ROBOT.get_ik_sorted(
         rotation_mat, translation_mat
     )
     for (q, error, ls) in solutions:
@@ -33,7 +54,7 @@ def run_ik_hardcoded(pos: list, quat: list):
         for qVal in q:
             print(qVal)
 
-        compare_results(robot, q, pos, quat)
+        compare_results(ROBOT, q, pos, quat)
         print("-----------------------------")
     print("-----------------------------")
 
@@ -56,7 +77,7 @@ def run_ik_general(pos: list, quat: list):
             [0., -1., 0.],
             [0., -1., 0.],
             [0., -1., 0.],
-            [0., 0., -1.],
+            [0., -0., -1.],
             [0., -1., 0.]
         ]
     )
@@ -64,16 +85,17 @@ def run_ik_general(pos: list, quat: list):
         [
             [0., 0., 0.],
             [0., 0., 0.0892],
-            [-0.425, 0., 0.],
-            [-0.3922, 0., 0.],
+            [-0.425, -0., 0.],
+            [-0.3922, -0., 0.],
             [0., -0.1091, 0.],
-            [0., 0., -0.0946],
+            [0., -0., -0.0946],
             [0., -0.0823, 0.]
         ]
     )
 
     # MUST SET THE KINEMATICS OBJECT BEFORE RUNNING IK IN GENERAL CASE
-    robot = Robot.three_parallel_two_intersecting(hMat, pMat)
+    global ROBOT
+    ROBOT = Robot.three_parallel_two_intersecting(hMat, pMat)
 
     # Get the inverse kinematics
     # The first argument is the rotation matrix (3x3, row major deconstructed)
@@ -81,7 +103,7 @@ def run_ik_general(pos: list, quat: list):
     rotation_mat = quaternion_to_rotation_matrix(quat)
     translation_mat = pos_quat_to_transformation_matrix(pos)
 
-    solutions = robot.get_ik_sorted(
+    solutions = ROBOT.get_ik_sorted(
         rotation_mat, translation_mat
     )
 
@@ -93,7 +115,7 @@ def run_ik_general(pos: list, quat: list):
         for qVal in q:
             print(qVal)
 
-        compare_results(robot, q, pos, quat)
+        compare_results(ROBOT, q, pos, quat)
         print("-----------------------------")
     print("-----------------------------")
 
@@ -198,6 +220,20 @@ def quaternion_error(q1, q2):
     return theta
 
 
+def tf_matrix_to_pos_quat(tf_matrix):
+    # Extract the position vector
+    pos = tf_matrix[:3, 3]
+
+    # Extract the rotation matrix
+    rot_matrix = tf_matrix[:3, :3]
+
+    # Convert the rotation matrix to a quaternion
+    rot = R.from_matrix(rot_matrix)
+    quat = rot.as_quat()  # Returns (x, y, z, w)
+
+    return pos, quat
+
+
 def rotation_matrix_to_quaternion(R: np.ndarray) -> list:
     """
     Convert a rotation matrix into a quaternion.
@@ -276,9 +312,49 @@ def compare_results(robot: Robot, q: list, pos: list, quat: list):
 if __name__ == "__main__":
     np.set_printoptions(precision=4, suppress=True)
 
-    pos = [0.3, 0.209, 0.6]
-    quat = [-0.579, 0.579, -0.406, 0.406]
+    # pos = [0.3, 0.209, 0.6]
+    # quat = [-0.579, 0.579, -0.406, 0.406]
+
+    pos = [-0.81725, -0.19145, -0.005491]
+    quat = [np.pi / 4, 0, 0, np.pi / 4]
 
     # run_ik_hardcoded(pos, quat)
     run_ik_general(pos, quat)
     # test_trac_ik(pos, quat)
+
+    q = [
+        1.1201117439322532,
+        -1.1854456154121358,
+        -1.7795242039677202,
+        -0.8367197972930205,
+        0.5570414536216458,
+        0.5817168645822628
+    ]
+
+    trac_ik_theta_vec = np.array([
+        1.1195474479938143,
+        -1.1844174982118663,
+        -1.7769988076059189,
+        -0.8513708314989512,
+        0.5611631778261401,
+        0.5899065214467356
+    ])
+    ee = get_tf(
+        trac_ik_theta_vec,
+        d_list,
+        a_list,
+        alpha_list
+    )
+
+    iks_deg = ur5.solve(ee.flatten())
+    iks_rad = [[jj * np.pi / 180 for jj in ii] for ii in iks_deg]
+
+    quat = rotation_matrix_to_quaternion(ROBOT.forward_kinematics(q)[0])
+    pos = ROBOT.forward_kinematics(q)[1]
+
+    print(f"Forward Kinematics :")
+    print(f"Position: {pos}")
+    print(f"Quaternion: {quat}")
+
+    print(f"The number of IKS for given ee-pose is {len(iks_deg)}")
+    print(iks_rad)
