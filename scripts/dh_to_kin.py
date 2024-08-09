@@ -6,56 +6,26 @@ Convert a robot defined in Denavit-Hartenberg convention to Product
 of Exponentials.
 """
 
+import argparse
 import numpy as np
 
-
-def rot(axis: np.ndarray, angle: float) -> np.ndarray:
-    """ Create a rotation matrix given an axis and an angle.
-
-    Args:
-        axis (np.array): The axis of rotation.
-        angle (float): The angle of rotation.
-
-    Returns:
-        np.array: The rotation matrix
-    """
-    cos_angle = np.cos(angle)
-    sin_angle = np.sin(angle)
-    one_minus_cos = 1 - cos_angle
-
-    axis = axis / np.linalg.norm(axis)
-    x, y, z = axis
-
-    return np.array([
-        [
-            cos_angle + x*x*one_minus_cos,
-            x*y*one_minus_cos - z*sin_angle,
-            x*z*one_minus_cos + y*sin_angle
-        ], [
-            x*y*one_minus_cos + z*sin_angle,
-            cos_angle + y*y * one_minus_cos,
-            y*z*one_minus_cos - x*sin_angle
-        ], [
-            x*z*one_minus_cos - y*sin_angle,
-            y*z*one_minus_cos + x*sin_angle,
-            cos_angle + z*z*one_minus_cos
-        ]
-    ])
+from yaml_parser import extract_param_from_yaml as parse_yaml
+from help_maths import axis_rot
 
 
-def dh_to_kin(alpha_vec: np.ndarray, a_vec: np.ndarray, d_vec: np.ndarray) -> dict:
+def dh_to_kin(d_val: np.ndarray, a_val: np.ndarray, alpha_val: np.ndarray) -> dict:
     """ Convert a robot defined in Denavit-Hartenberg convention to
     Product of Exponentials.
 
     Args:
-        alpha_vec (np.array): The alpha vector.
+        alpha_val (np.array): The alpha vector.
         a_vec (np.array): The a vector.
         d_vec (np.array): The d vector.
 
     Returns:
         dict: The kinematic structure of the robot.
     """
-    N = len(alpha_vec)
+    N = len(alpha_val)
     kin = {
         'joint_type': np.zeros(N),
         'H': np.full((3, N), np.nan),
@@ -69,25 +39,21 @@ def dh_to_kin(alpha_vec: np.ndarray, a_vec: np.ndarray, d_vec: np.ndarray) -> di
     for i in range(N):
         # Translate d_i along z_{i-1}
         # Move a along x_{i-1}
-        kin['P'][:, i+1] = d_vec[i] * R[:, 2] + a_vec[i] * R[:, 0]
+        kin['P'][:, i+1] = d_val[i] * R[:, 2] + a_val[i] * R[:, 0]
 
         # Rotate by alpha along x_{i-1}
-        R = rot(R[:, 0], alpha_vec[i]) @ R
+        R = axis_rot(R[:, 0], alpha_val[i]) @ R
 
         if i == N - 1:
-            kin['RT'] = rot(R[:, 0], alpha_vec[i])
+            kin['RT'] = axis_rot(R[:, 0], alpha_val[i])
         else:
             kin['H'][:, i+1] = R[:, 2]  # Joint axis is z axis
 
     return kin
 
 
-if __name__ == '__main__':
-    alpha_vec = np.array([0, -np.pi / 2, 0, 0, -np.pi / 2, np.pi / 2])
-    a_vec = np.array([0, -0.13585, 0.425, 0.39225, 0, 0])
-    d_vec = np.array([0.089159, 0, -0.1197, 0, 0.093, 0.0823])
-
-    kin = dh_to_kin(alpha_vec, a_vec, d_vec)
+def main(d_val, a_val, alpha_val):
+    kin = dh_to_kin(d_val, a_val, alpha_val)
 
     # Set print options for better readability
     np.set_printoptions(precision=4, suppress=True)
@@ -97,3 +63,28 @@ if __name__ == '__main__':
     print("P Matrix:\n", np.array2string(kin['P'].T, separator=','))
     if 'RT' in kin:
         print("RT Matrix:\n", kin['RT'])
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='DH to Kinematics Converter')
+    parser.add_argument('yaml_file', type=str, help='Path to the YAML file')
+    parser.add_argument(
+        '--config', type=str, default='default',
+        help='Configuration name inside the YAML file'
+    )
+
+    args = parser.parse_args()
+
+    d_val, a_val, alpha_val = None, None, None
+    try:
+        d_val, a_val, alpha_val = parse_yaml(
+            args.yaml_file, args.config
+        )
+        print(f"d: {d_val}, a: {a_val}, alpha: {alpha_val}")
+    except (FileNotFoundError, KeyError, ValueError) as e:
+        print(e)
+
+    print("\nRunning DH to Kinematics conversion:")
+    print(f"YAML file: {args.yaml_file} - Configuration: {args.config}")
+    print(f"DH Parameters: d={d_val}, a={a_val}, alpha={alpha_val}")
+    main(d_val, a_val, alpha_val)
