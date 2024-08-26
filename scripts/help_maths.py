@@ -9,7 +9,7 @@ PI = np.pi
 
 
 def x_trans_matrix(val: float) -> np.ndarray:
-    """ Create a translation matrix along the x-axis.
+    """Create a translation matrix along the x-axis.
 
     Args:
         val (float): The value to translate by.
@@ -24,7 +24,7 @@ def x_trans_matrix(val: float) -> np.ndarray:
 
 
 def y_trans_matrix(val: float) -> np.ndarray:
-    """ Create a translation matrix along the y-axis.
+    """Create a translation matrix along the y-axis.
 
     Args:
         val (float): The value to translate by.
@@ -39,7 +39,7 @@ def y_trans_matrix(val: float) -> np.ndarray:
 
 
 def z_trans_matrix(val: float) -> np.ndarray:
-    """ Create a translation matrix along the z-axis.
+    """Create a translation matrix along the z-axis.
 
     Args:
         val (float): The value to translate by.
@@ -54,7 +54,7 @@ def z_trans_matrix(val: float) -> np.ndarray:
 
 
 def x_rot_matrix(in_theta: float) -> np.ndarray:
-    """ Create a rotation matrix along the x-axis.
+    """Create a rotation matrix along the x-axis.
 
     Args:
         in_theta (float): The angle of rotation.
@@ -72,7 +72,7 @@ def x_rot_matrix(in_theta: float) -> np.ndarray:
 
 
 def y_rot_matrix(in_theta: float) -> np.ndarray:
-    """ Create a rotation matrix along the y-axis.
+    """Create a rotation matrix along the y-axis.
 
     Args:
         in_theta (float): The angle of rotation.
@@ -90,7 +90,7 @@ def y_rot_matrix(in_theta: float) -> np.ndarray:
 
 
 def z_rot_matrix(in_theta: float) -> np.ndarray:
-    """ Create a rotation matrix along the z-axis.
+    """Create a rotation matrix along the z-axis.
 
     Args:
         in_theta (float): The angle of rotation.
@@ -108,7 +108,7 @@ def z_rot_matrix(in_theta: float) -> np.ndarray:
 
 
 def axis_rot(axis: np.ndarray, angle: float) -> np.ndarray:
-    """ Create a rotation matrix given an axis and an angle.
+    """Create a rotation matrix given an axis and an angle.
 
     Args:
         axis (np.array): The axis of rotation.
@@ -124,28 +124,35 @@ def axis_rot(axis: np.ndarray, angle: float) -> np.ndarray:
     axis = axis / np.linalg.norm(axis)
     x, y, z = axis
 
-    return np.array([
+    return np.array(
         [
-            cos_angle + x*x*one_minus_cos,
-            x*y*one_minus_cos - z*sin_angle,
-            x*z*one_minus_cos + y*sin_angle
-        ], [
-            x*y*one_minus_cos + z*sin_angle,
-            cos_angle + y*y * one_minus_cos,
-            y*z*one_minus_cos - x*sin_angle
-        ], [
-            x*z*one_minus_cos - y*sin_angle,
-            y*z*one_minus_cos + x*sin_angle,
-            cos_angle + z*z*one_minus_cos
+            [
+                cos_angle + x * x * one_minus_cos,
+                x * y * one_minus_cos - z * sin_angle,
+                x * z * one_minus_cos + y * sin_angle,
+            ],
+            [
+                x * y * one_minus_cos + z * sin_angle,
+                cos_angle + y * y * one_minus_cos,
+                y * z * one_minus_cos - x * sin_angle,
+            ],
+            [
+                x * z * one_minus_cos - y * sin_angle,
+                y * z * one_minus_cos + x * sin_angle,
+                cos_angle + z * z * one_minus_cos,
+            ],
         ]
-    ])
+    )
 
 
 def get_transformation(
-        theta_val: np.array, d_val: np.array, a_val: np.array, alpha_val: np.array,
-        print_pose=False
+    theta_val: np.array,
+    d_val: np.array,
+    a_val: np.array,
+    alpha_val: np.array,
+    print_pose=False,
 ) -> np.ndarray:
-    """ Get the transformation matrix given the DH parameters.
+    """Get the transformation matrix given the DH parameters.
 
     Args:
         theta_val (np.array): The theta values.
@@ -157,16 +164,23 @@ def get_transformation(
     Returns:
         np.array: The transformation matrix.
     """
-    if not (np.size(theta_val) == np.size(d_val) == np.size(a_val) == np.size(alpha_val)):
+    trans_size = 4  # Transformation matrix size is 4x4
+
+    if not (
+        np.size(theta_val) == np.size(d_val) == np.size(a_val) == np.size(alpha_val)
+    ):
         raise ValueError("All inputs must have the same length")
 
-    coord_num = np.size(theta_val)
-    m = np.identity(coord_num)
+    m = np.identity(trans_size)
+    n_dofs = np.size(theta_val)
 
-    for i in range(coord_num):
+    for i in range(n_dofs):
         m = (
-            m @ z_rot_matrix(theta_val[i]) @ z_trans_matrix(d_val[i]) @
-            x_rot_matrix(alpha_val[i]) @ x_trans_matrix(a_val[i])
+            m
+            @ z_rot_matrix(theta_val[i])
+            @ z_trans_matrix(d_val[i])
+            @ x_rot_matrix(alpha_val[i])
+            @ x_trans_matrix(a_val[i])
         )
 
     if print_pose:
@@ -178,7 +192,7 @@ def get_transformation(
 
 
 def tf_matrix_to_pos_quat(tf_matrix: np.ndarray) -> tuple:
-    """ Convert a transformation matrix to position and quaternion.
+    """Convert a transformation matrix to position and quaternion.
 
     Args:
         tf_matrix (np.array): The transformation matrix.
