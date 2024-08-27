@@ -10,18 +10,23 @@ import os
 import argparse
 import numpy as np
 
-from yaml_parser import extract_param_from_yaml as parse_yaml
-from help_maths import axis_rot
+from numpy.typing import NDArray
+from .tools.yaml_parser import extract_param_from_yaml as parse_yaml
+from .tools.help_maths import axis_rot
 
 
-def dh_to_kin(d_val: np.ndarray, a_val: np.ndarray, alpha_val: np.ndarray) -> dict:
+def dh_to_kin(
+    d_val: NDArray[np.generic],
+    a_val: NDArray[np.generic],
+    alpha_val: NDArray[np.generic],
+) -> dict:
     """Convert a robot defined in Denavit-Hartenberg convention to
     Product of Exponentials.
 
     Args:
-        alpha_val (np.array): The alpha vector.
-        a_vec (np.array): The a vector.
-        d_vec (np.array): The d vector.
+        alpha_val (NDArray[np.generic]): The alpha vector.
+        a_vec (NDArray[np.generic]): The a vector.
+        d_vec (NDArray[np.generic]): The d vector.
 
     Returns:
         dict: The kinematic structure of the robot.
@@ -53,15 +58,25 @@ def dh_to_kin(d_val: np.ndarray, a_val: np.ndarray, alpha_val: np.ndarray) -> di
     return kin
 
 
-def main(d_val, a_val, alpha_val):
-    kin = dh_to_kin(d_val, a_val, alpha_val)
+def main(
+    d_val: NDArray[np.generic],
+    a_val: NDArray[np.generic],
+    alpha_val: NDArray[np.generic],
+):
+    """Main function to run the DH to Kinematics conversion.
 
-    # Set print options for better readability
+    Args:
+        d_val (NDArray[np.generic]): The d vector.
+        a_val (NDArray[np.generic]): The a vector.
+        alpha_val (NDArray[np.generic]): The alpha vector.
+    """
     np.set_printoptions(precision=4, suppress=True)
+    kin = dh_to_kin(d_val, a_val, alpha_val)
 
     print("Joint Types:", kin["joint_type"])
     print("H Matrix:\n", np.array2string(kin["H"].T, separator=","))
     print("P Matrix:\n", np.array2string(kin["P"].T, separator=","))
+
     if "RT" in kin:
         print("RT Matrix:\n", kin["RT"])
 

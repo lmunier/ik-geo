@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """ Helper functions to parse yaml configuration files. """
-
-
 import yaml
 
+from typing import Union
 from math import pi
 
 
-def extract_param_from_yaml(file_path: str, config: str = 'default') -> tuple:
-    """ Extract DH parameters from a YAML file.
+def extract_param_from_yaml(file_path: str, config: str = "default") -> tuple:
+    """Extract DH parameters from a YAML file.
 
     Args:
         file_path (str): Path to the YAML file.
@@ -19,7 +18,7 @@ def extract_param_from_yaml(file_path: str, config: str = 'default') -> tuple:
     Returns:
         tuple: The extracted parameters.
     """
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         try:
             parameters = yaml.safe_load(file)
             if config not in parameters:
@@ -28,24 +27,23 @@ def extract_param_from_yaml(file_path: str, config: str = 'default') -> tuple:
                 )
 
             dh_config = parameters[config]
-            required_keys = ['d', 'a', 'alpha']
+            required_keys = ["d", "a", "alpha"]
             for key in required_keys:
                 if key not in dh_config:
                     raise KeyError(
                         f"The key '{key}' is missing in the configuration '{config}'."
                     )
 
-            d_val, a_val = dh_config['d'], dh_config['a']
-            alpha_val = evaluate_expression(dh_config['alpha'])
+            d_val, a_val = dh_config["d"], dh_config["a"]
+            alpha_val = evaluate_expression(dh_config["alpha"])
 
             return d_val, a_val, alpha_val
         except yaml.YAMLError as exc:
             raise ValueError(f"Error reading YAML file: {exc}")
 
 
-# Function to evaluate expressions
-def evaluate_expression(value: any) -> any:
-    """ Evaluate the expressions in the list.
+def evaluate_expression(value: Union[int, float, str, list]) -> Union[int, float]:
+    """Evaluate the expressions in the list.
 
     Args:
         value: The value to evaluate.
@@ -61,6 +59,6 @@ def evaluate_expression(value: any) -> any:
         return evaluation
     else:
         if isinstance(value, str):
-            return eval(value, {'pi': pi})
+            return eval(value, {"pi": pi})
         else:
             return value
