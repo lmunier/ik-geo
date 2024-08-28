@@ -11,8 +11,8 @@ import argparse
 import numpy as np
 
 from numpy.typing import NDArray
-from .tools.yaml_parser import extract_param_from_yaml as parse_yaml
-from .tools.help_maths import axis_rot
+from tools.yaml_parser import extract_param_from_yaml as parse_yaml
+from tools.help_maths import axis_rot
 
 
 def dh_to_kin(
